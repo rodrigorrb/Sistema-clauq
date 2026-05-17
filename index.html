@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#1c0f00"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Sistema ClauQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#1c0f00;font-family:'DM Sans',sans-serif}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;background:#faf5ee;overflow:hidden;position:relative}
+input,select,textarea{font-family:'DM Sans',sans-serif;font-size:15px}
+::-webkit-scrollbar{display:none}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sheet-overlay{position:fixed;inset:0;background:rgba(28,15,0,.55);z-index:500;display:flex;flex-direction:column;justify-content:flex-end}
+.sheet{background:#faf5ee;border-radius:20px 20px 0 0;max-height:92vh;display:flex;flex-direction:column;animation:slideUp .25s ease-out;position:relative}
+.sheet.full{max-height:97vh}
+.sheet-body{overflow-y:auto;padding:0 20px 48px;flex:1}
+.handle{display:flex;justify-content:center;padding:12px 0 0}
+.handle-bar{width:40px;height:4px;border-radius:2px;background:#e8ddd0}
+.sheet-title{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 14px}
+.nav{background:#fff;border-top:1px solid #e8ddd0;display:flex;padding:6px 0 8px;flex-shrink:0;box-shadow:0 -4px 20px rgba(28,15,0,.08)}
+.nav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer}
+.nav-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.toast{position:fixed;bottom:82px;left:12px;right:12px;color:#fff;padding:13px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.25);font-size:14px;font-weight:500;animation:slideUp .2s ease-out}
+.card{background:#fff;border-radius:16px;padding:15px 16px;box-shadow:0 2px 16px rgba(28,15,0,.08);border:1px solid #e8ddd0}
+.fab{position:fixed;bottom:76px;right:16px;background:#d4522a;color:#fff;border:none;border-radius:20px;padding:13px 18px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(212,82,42,.45);cursor:pointer;z-index:200;font-family:'DM Sans',sans-serif}
+.inp-wrap{margin-bottom:14px}
+.inp-label{display:block;font-size:12px;font-weight:600;color:#8a6a50;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.inp{width:100%;padding:13px 15px;border-radius:12px;border:1.5px solid #e8ddd0;background:#fdf8f3;color:#1c0f00;outline:none}
+.inp:focus{border-color:#d4522a}
+.btn{border:none;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;justify-content:center;transition:opacity .15s}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#d4522a;color:#fff;box-shadow:0 4px 14px rgba(212,82,42,.35)}
+.btn-green{background:#3d7a5f;color:#fff;box-shadow:0 4px 14px rgba(61,122,95,.3)}
+.btn-ghost{background:#f0e8df;color:#8a6a50}
+.btn-danger{background:#7f1d1d;color:#fff}
+.btn-lg{padding:14px 22px;font-size:15px}
+.btn-sm{padding:9px 16px;font-size:13px}
+.btn-full{width:100%}
+.tag{display:inline-block;background:#f0e8df;color:#8a6a50;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600}
+</style>
+</head>
+<body>
+<div id="app"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1c0f00;gap:12px"><span style="font-size:52px">🍱</span><span style="font-family:'DM Serif Display',serif;font-size:24px;color:#fdf0df">Sistema ClauQ</span><span style="font-size:13px;color:#c8a070">Carregando...</span></div></div>
+<script type="module">
+import{h,render}from'https://esm.sh/preact@10.22.0';
+import{useState,useEffect,useRef,useCallback}from'https://esm.sh/preact@10.22.0/hooks';
+import htm from'https://esm.sh/htm@3.1.1';
+const x=htm.bind(h);
+
+// ── Storage ──────────────────────────────────────────────────────────────────
+const DB={
+  get:k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+
+// ── ESC/POS ──────────────────────────────────────────────────────────────────
+const E=0x1B,G=0x1D;
+const ep={I:[E,0x40],C:[G,0x56,0x41,0x10],L:[0x0A],CE:[E,0x61,0x01],LE:[E,0x61,0x00],RI:[E,0x61,0x02],BO:[E,0x45,0x01],BF:[E,0x45,0x00],DO:[E,0x21,0x30],DF:[E,0x21,0x00],
+  SEP:()=>Array.from("--------------------------------").map(c=>c.charCodeAt(0)),
+  LN:s=>[...Array.from(s).map(c=>{const n=c.charCodeAt(0);return n>127?63:n}),0x0A]
+};
+function buildReceipt(lines){
+  let b=[...ep.I];
+  for(const l of lines){
+    b.push(...(l.type==='center'?ep.CE:l.type==='right'?ep.RI:ep.LE));
+    if(l.bold)b.push(...ep.BO);if(l.double)b.push(...ep.DO);
+    if(l.sep)b.push(...ep.SEP(),0x0A);else b.push(...ep.LN(l.text||''));
+    if(l.double)b.push(...ep.DF);if(l.bold)b.push(...ep.BF);
+  }
+  b.push(...ep.L,...ep.L,...ep.L,...ep.C);return new Uint8Array(b);
+}
+
+// ── Bluetooth ─────────────────────────────────────────────────────────────────
+const BTP=[
+  {service:'000018f0-0000-1000-8000-00805f9b34fb',char:'00002af1-0000-1000-8000-00805f9b34fb'},
+  {service:'e7810a71-73ae-499d-8c15-faa9aef0c3f2',char:'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'},
+  {service:'49535343-fe7d-4ae5-8fa9-9fafd205e455',char:'49535343-8841-43f4-a8d4-ecbe34729bb3'},
+];
+function usePrinter(){
+  const[status,setStatus]=useState('off');
+  const[name,setName]=useState(null);
+  const cr=useRef(null),dr=useRef(null);
+  const connect=useCallback(async()=>{
+    if(!navigator.bluetooth)return{ok:false,err:'Use o Chrome no Android para Bluetooth.'};
+    setStatus('connecting');
+    try{
+      const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:BTP.map(p=>p.service)});
+      dr.current=dev;
+      dev.addEventListener('gattserverdisconnected',()=>{setStatus('off');setName(null);cr.current=null;});
+      const srv=await dev.gatt.connect();
+      let found=null;
+      for(const p of BTP){try{const s=await srv.getPrimaryService(p.service);found=await s.getCharacteristic(p.char);break}catch{}}
+      if(!found){try{for(const s of await srv.getPrimaryServices()){for(const c of await s.getCharacteristics()){if(c.properties.write||c.properties.writeWithoutResponse){found=c;break}}if(found)break}}catch{}}
+      if(!found){setStatus('off');return{ok:false,err:'Impressora não reconhecida.'};}
+      cr.current=found;setName(dev.name||'Impressora BT');setStatus('on');return{ok:true};
+    }catch(e){setStatus('off');return{ok:false,err:e.name==='NotFoundError'?'Cancelado.':e.message};}
+  },[]);
+  const disconnect=useCallback(()=>{dr.current?.gatt?.connected&&dr.current.gatt.disconnect();cr.current=null;setStatus('off');setName(null);},[]);
+  const print=useCallback(async(data)=>{
+    if(!cr.current)return{ok:false,err:'Impressora desconectada.'};
+    try{
+      for(let i=0;i<data.length;i+=512){
+        const c=data.slice(i,i+512);
+        if(cr.current.properties.writeWithoutResponse)await cr.current.writeValueWithoutResponse(c);
+        else await cr.current.writeValue(c);
+        await new Promise(r=>setTimeout(r,60));
+      }
+      return{ok:true};
+    }catch(e){return{ok:false,err:e.message};}
+  },[]);
+  return{status,name,connect,disconnect,print};
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const today=()=>new Date().toISOString().split('T')[0];
+const mY=d=>{const dt=new Date(d+'T12:00:00');return`${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`};
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+const T={bg:'#faf5ee',card:'#fff',hdr:'#1c0f00',ac:'#d4522a',g:'#3d7a5f',tx:'#1c0f00',sub:'#8a6a50',br:'#e8ddd0',inp:'#fdf8f3'};
+
+// ── SVG Icons ─────────────────────────────────────────────────────────────────
+const PH={
+  home:'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+  users:'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+  cart:'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
+  menu:'M4 6h16M4 12h16M4 18h16',
+  chart:'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+  print:'M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z',
+  plus:'M12 4v16m8-8H4',
+  trash:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+  edit:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+  check:'M5 13l4 4L19 7',
+  X:'M6 18L18 6M6 6l12 12',
+  star:'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
+  wifi:'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.143 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',
+  nobt:'M18.364 5.636a9 9 0 010 12.728m-3.536-3.536a5 5 0 000-7.072m-7.072 7.072a5 5 0 010-7.072M5.636 5.636a9 9 0 000 12.728',
+  search:'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+};
+const Ic=({n,s=22,c='currentColor',sw=2})=>x`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} stroke-width=${sw} stroke-linecap="round" stroke-linejoin="round"><path d=${PH[n]}/></svg>`;
+
+// ── UI Primitives ──────────────────────────────────────────────────────────────
+function Toast({msg,type,onDone}){
+  useEffect(()=>{const t=setTimeout(onDone,3200);return()=>clearTimeout(t)},[]);
+  const bg={success:'#2d6a4f',error:'#c1440e',info:'#5c4a2a'}[type]||'#5c4a2a';
+  return x`<div class="toast" style=${{background:bg}}><${Ic} n=${type==='success'?'check':'X'} s=${18} c="#fff"/>${msg}</div>`;
+}
+
+function Sheet({title,onClose,children,full}){
+  useEffect(()=>{document.body.style.overflow='hidden';return()=>{document.body.style.overflow=''}},[]);
+  return x`
+    <div class="sheet-overlay" onClick=${e=>{if(e.target===e.currentTarget)onClose()}}>
+      <div class=${'sheet'+(full?' full':'')}>
+        <div class="handle"><div class="handle-bar"/></div>
+        <div class="sheet-title">
+          <span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>${title}</span>
+          <button onClick=${onClose} style=${{background:'#f0e8df',border:'none',borderRadius:'10px',width:'34px',height:'34px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="X" s=${18} c=${T.sub}/></button>
+        </div>
+        <div class="sheet-body">${children}</div>
+      </div>
+    </div>`;
+}
+
+const Inp=({label,...p})=>x`<div class="inp-wrap">${label&&x`<label class="inp-label">${label}</label>`}${p.as==='textarea'?x`<textarea ...${({...p,as:undefined})} class="inp" style=${{minHeight:'80px',resize:'vertical',...p.style}}/>`:x`<input ...${p} class="inp"/>`}</div>`;
+
+const Btn=({children,onClick,variant='primary',icon,disabled,full,small})=>{
+  const cls=`btn btn-${variant} ${small?'btn-sm':'btn-lg'} ${full?'btn-full':''}`;
+  const c={primary:'#fff',green:'#fff',ghost:T.sub,danger:'#fff'}[variant]||'#fff';
+  return x`<button class=${cls} disabled=${disabled} onClick=${onClick}>${icon&&x`<${Ic} n=${icon} s=${small?15:18} c=${c}/>`}${children}</button>`;
+};
+
+const Card=({children,onClick,style:sx})=>x`<div class="card" style=${sx} onClick=${onClick}>${children}</div>`;
+const FAB=({onClick,label})=>x`<button class="fab" onClick=${onClick}><${Ic} n="plus" s=${20} c="#fff"/>${label}</button>`;
+const SHead=({title,right})=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'14px'}}><h2 style=${{margin:0,fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>${title}</h2>${right||null}</div>`;
+
+// ── HOME ───────────────────────────────────────────────────────────────────────
+function Home({clientes,pedidos,setScreen}){
+  const ts=today(),hoje=pedidos.filter(p=>p.data===ts);
+  const tH=hoje.reduce((s,p)=>s+Number(p.valor),0);
+  const mes=mY(ts),tM=pedidos.filter(p=>mY(p.data)===mes).reduce((s,p)=>s+Number(p.valor),0);
+  const dl=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  return x`<div>
+    <div style=${{background:'linear-gradient(135deg,#1c0f00 0%,#3d1a00 100%)',margin:'-16px -16px 20px',padding:'28px 20px 24px',borderRadius:'0 0 24px 24px'}}>
+      <p style=${{fontSize:'13px',color:'#c8a070',textTransform:'capitalize',marginBottom:'4px'}}>${dl}</p>
+      <h1 style=${{fontFamily:"'DM Serif Display',serif",fontSize:'26px',color:'#fdf0df',margin:0}}>Bom dia! 🍱</h1>
+    </div>
+    <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'20px'}}>
+      ${[{ic:'users',lb:'Clientes',v:clientes.length,co:'#3d7a5f'},{ic:'cart',lb:'Pedidos hoje',v:hoje.length,co:T.ac},{ic:'star',lb:'Hoje',v:fmt(tH),co:'#a05a20'},{ic:'chart',lb:'Este mês',v:fmt(tM),co:'#5c3d8a'}].map(m=>x`
+        <${Card} style=${{padding:'16px'}}>
+          <div style=${{width:'36px',height:'36px',borderRadius:'10px',background:m.co+'18',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'10px'}}><${Ic} n=${m.ic} s=${18} c=${m.co}/></div>
+          <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:m.v.toString().length>7?'15px':'20px',color:T.tx,fontWeight:700,lineHeight:1.2}}>${m.v}</div>
+          <div style=${{fontSize:'12px',color:T.sub,marginTop:'3px'}}>${m.lb}</div>
+        <//>
+      `)}
+    </div>
+    <${SHead} title="Acesso rápido"/>
+    <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'20px'}}>
+      ${[{ic:'cart',lb:'Novo Pedido',sc:'pedidos',co:T.ac},{ic:'users',lb:'Clientes',sc:'clientes',co:'#3d7a5f'},{ic:'menu',lb:'Cardápio',sc:'cardapio',co:'#a05a20'},{ic:'chart',lb:'Relatório',sc:'relatorio',co:'#5c3d8a'}].map(a=>x`
+        <button onClick=${()=>setScreen(a.sc)} style=${{background:T.card,border:`1px solid ${T.br}`,borderRadius:'14px',padding:'14px',display:'flex',alignItems:'center',gap:'10px',cursor:'pointer',boxShadow:'0 2px 16px rgba(28,15,0,.08)'}}>
+          <div style=${{width:'38px',height:'38px',borderRadius:'10px',background:a.co+'18',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><${Ic} n=${a.ic} s=${19} c=${a.co}/></div>
+          <span style=${{fontSize:'13px',fontWeight:700,color:T.tx}}>${a.lb}</span>
+        </button>
+      `)}
+    </div>
+    ${hoje.length>0?x`
+      <${SHead} title="Hoje" right=${x`<button onClick=${()=>setScreen('pedidos')} style=${{background:'none',border:'none',color:T.ac,fontSize:'13px',fontWeight:700,cursor:'pointer'}}>Ver todos</button>`}/>
+      <div style=${{display:'flex',flexDirection:'column',gap:'8px',paddingBottom:'80px'}}>
+        ${hoje.slice(-4).reverse().map(p=>x`
+          <${Card}>
+            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div><div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${p.cliente}</div><div style=${{fontSize:'12px',color:T.sub,marginTop:'2px'}}>${p.itens}</div></div>
+              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.ac,fontWeight:700}}>${fmt(p.valor)}</div>
+            </div>
+          <//>
+        `)}
+      </div>
+    `:null}
+  </div>`;
+}
+
+// ── CLIENTES ───────────────────────────────────────────────────────────────────
+function Clientes({clientes,setClientes,toast}){
+  const[sheet,setSheet]=useState(null),[busca,setBusca]=useState('');
+  const[form,setForm]=useState({nome:'',telefone:'',endereco:'',obs:''});
+  const openNew=()=>{setForm({nome:'',telefone:'',endereco:'',obs:''});setSheet('new')};
+  const openEdit=c=>{setForm({nome:c.nome,telefone:c.telefone||'',endereco:c.endereco||'',obs:c.obs||''});setSheet(c)};
+  const save=()=>{
+    if(!form.nome.trim())return toast('Informe o nome.','error');
+    const list=sheet==='new'?[...clientes,{...form,id:Date.now()}]:clientes.map(c=>c.id===sheet.id?{...c,...form}:c);
+    DB.set('clauq:clientes',list);setClientes(list);setSheet(null);
+    toast(sheet==='new'?'Cliente cadastrado!':'Atualizado!','success');
+  };
+  const del=id=>{
+    if(!confirm('Remover cliente?'))return;
+    const list=clientes.filter(c=>c.id!==id);
+    DB.set('clauq:clientes',list);setClientes(list);toast('Removido.','success');
+  };
+  const fil=clientes.filter(c=>c.nome.toLowerCase().includes(busca.toLowerCase())||(c.telefone||'').includes(busca));
+  return x`<div>
+    <${SHead} title=${`Clientes (${clientes.length})`}/>
+    <div style=${{position:'relative',marginBottom:'16px'}}>
+      <div style=${{position:'absolute',left:'13px',top:'50%',transform:'translateY(-50%)'}}><${Ic} n="search" s=${18} c=${T.sub}/></div>
+      <input value=${busca} onInput=${e=>setBusca(e.target.value)} placeholder="Buscar..." class="inp" style=${{paddingLeft:'42px'}}/>
+    </div>
+    ${fil.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>${busca?'Nenhum resultado.':'Cadastre o primeiro cliente!'}</div>`:x`
+      <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'80px'}}>
+        ${fil.map(c=>x`
+          <${Card}>
+            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div style=${{flex:1}}>
+                <div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${c.nome}</div>
+                ${c.telefone?x`<div style=${{fontSize:'13px',color:T.sub,marginTop:'2px'}}>📞 ${c.telefone}</div>`:null}
+                ${c.endereco?x`<div style=${{fontSize:'13px',color:T.sub}}>📍 ${c.endereco}</div>`:null}
+              </div>
+              <div style=${{display:'flex',gap:'8px'}}>
+                <button onClick=${()=>openEdit(c)} style=${{background:'#f0e8df',border:'none',borderRadius:'10px',width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="edit" s=${16} c=${T.sub}/></button>
+                <button onClick=${()=>del(c.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'10px',width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="trash" s=${16} c="#c1440e"/></button>
+              </div>
+            </div>
+          <//>
+        `)}
+      </div>
+    `}
+    <${FAB} onClick=${openNew} label="Novo cliente"/>
+    ${sheet?x`
+      <${Sheet} title=${sheet==='new'?'Novo Cliente':'Editar Cliente'} onClose=${()=>setSheet(null)}>
+        <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
+        <${Inp} label="Telefone" type="tel" value=${form.telefone} onInput=${e=>setForm({...form,telefone:e.target.value})}/>
+        <${Inp} label="Endereço" value=${form.endereco} onInput=${e=>setForm({...form,endereco:e.target.value})}/>
+        <${Inp} label="Observações" as="textarea" value=${form.obs} onInput=${e=>setForm({...form,obs:e.target.value})}/>
+        <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
+          <${Btn} variant="ghost" onClick=${()=>setSheet(null)} full=${true}>Cancelar<//>
+          <${Btn} onClick=${save} full=${true}>${sheet==='new'?'Cadastrar':'Salvar'}<//>
+        </div>
+      <//>
+    `:null}
+  </div>`;
+}
+
+// ── PEDIDOS ────────────────────────────────────────────────────────────────────
+function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
+  const[filtroData,setFiltroData]=useState(today()),[sheet,setSheet]=useState(false),[step,setStep]=useState(1);
+  const[form,setForm]=useState({clienteId:'',obs:'',data:today()}),[itens,setItens]=useState([]),[printing,setPrinting]=useState(null);
+  const fil=pedidos.filter(p=>!filtroData||p.data===filtroData);
+  const totDia=fil.reduce((s,p)=>s+Number(p.valor),0);
+  const btOn=printer.status==='on',totIt=itens.reduce((s,i)=>s+i.valor*i.qtd,0);
+  const cSel=clientes.find(c=>c.id===Number(form.clienteId));
+  const reset=()=>{setSheet(false);setStep(1);setForm({clienteId:'',obs:'',data:today()});setItens([])};
+  const togItem=item=>setItens(prev=>{const ex=prev.find(i=>i.id===item.id);if(ex)return prev.map(i=>i.id===item.id?{...i,qtd:i.qtd+1}:i);return[...prev,{...item,qtd:1}]});
+  const setQtd=(id,q)=>{if(q<1)setItens(p=>p.filter(i=>i.id!==id));else setItens(p=>p.map(i=>i.id===id?{...i,qtd:q}:i))};
+  const save=()=>{
+    if(!form.clienteId)return toast('Selecione um cliente.','error');
+    if(itens.length===0)return toast('Adicione pelo menos 1 item.','error');
+    const pedido={id:Date.now(),clienteId:Number(form.clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,obs:form.obs,data:form.data};
+    const list=[...pedidos,pedido];DB.set('clauq:pedidos',list);setPedidos(list);toast('Pedido criado!','success');reset();
+  };
+  const del=id=>{
+    if(!confirm('Remover pedido?'))return;
+    const list=pedidos.filter(p=>p.id!==id);DB.set('clauq:pedidos',list);setPedidos(list);toast('Removido.','success');
+  };
+  const prtPedido=async p=>{
+    setPrinting(p.id);
+    const h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const data=buildReceipt([
+      {type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},
+      {type:'center',text:`${new Date(p.data+'T12:00:00').toLocaleDateString('pt-BR')}  ${h}`},
+      {sep:true},{type:'left',text:`Cliente: ${p.cliente}`,bold:true},{sep:true},
+      ...(p.itensDetalhes||[]).map(it=>({type:'left',text:`${it.qtd}x ${it.nome.slice(0,20).padEnd(20)} ${fmt(it.valor*it.qtd)}`})),
+      {sep:true},{type:'right',text:`TOTAL: ${fmt(p.valor)}`,bold:true},
+      ...(p.obs?[{type:'left',text:`Obs: ${p.obs}`}]:[]),
+      {type:'center',text:'Obrigado!'},{type:'center',text:' '},
+    ]);
+    const res=await printer.print(data);toast(res.ok?'Cupom impresso!':'Erro: '+res.err,res.ok?'success':'error');setPrinting(null);
+  };
+  const prtDia=async()=>{
+    if(fil.length===0)return toast('Nenhum pedido nesta data.','error');
+    setPrinting('dia');
+    const df=new Date((filtroData||today())+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+    const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'PEDIDOS DO DIA',bold:true},{type:'center',text:df},{sep:true}];
+    fil.forEach((p,i)=>{lines.push({type:'left',text:`#${i+1} ${p.cliente}`,bold:true});lines.push({type:'left',text:p.itens});if(p.obs)lines.push({type:'left',text:`Obs: ${p.obs}`});lines.push({type:'right',text:fmt(p.valor)});lines.push({sep:true})});
+    lines.push({type:'right',text:`TOTAL: ${fmt(totDia)}`,bold:true},{type:'center',text:' '});
+    const res=await printer.print(buildReceipt(lines));toast(res.ok?`${fil.length} pedidos impressos!`:'Erro: '+res.err,res.ok?'success':'error');setPrinting(null);
+  };
+  const prtNav=()=>{
+    const df=new Date((filtroData||today())+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const w=window.open('','_blank');
+    w.document.write(`<html><head><title>Pedidos</title><style>body{font-family:Georgia,serif;padding:20px}table{width:100%;border-collapse:collapse}th{background:#f5e6d3;padding:8px;text-align:left;font-size:12px}td{padding:8px;border-bottom:1px solid #eee;font-size:12px}.tot{font-weight:bold;text-align:right;margin-top:12px;border-top:2px solid #c1440e;padding-top:8px}</style></head><body><h2>🍱 Sistema ClauQ</h2><p>${df}</p><table><thead><tr><th>#</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead><tbody>${fil.map((p,i)=>`<tr><td>${i+1}</td><td>${p.cliente}</td><td>${p.itens}</td><td>R$ ${Number(p.valor).toFixed(2)}</td></tr>`).join('')}</tbody></table><p class="tot">Total: R$ ${totDia.toFixed(2)}</p><script>window.print()<\/script></body></html>`);
+    w.document.close();
+  };
+  const stepView=()=>{
+    if(step===1)return x`<div>
+      <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 1 de 3 — Selecione o cliente</p>
+      <div class="inp-wrap"><label class="inp-label">Data</label><input type="date" value=${form.data} onInput=${e=>setForm({...form,data:e.target.value})} class="inp"/></div>
+      <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
+        ${clientes.length===0?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Cadastre clientes primeiro.</p>`:clientes.map(c=>x`
+          <button onClick=${()=>setForm({...form,clienteId:String(c.id)})} style=${{background:form.clienteId===String(c.id)?T.ac+'18':T.card,border:`2px solid ${form.clienteId===String(c.id)?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px',cursor:'pointer',textAlign:'left'}}>
+            <div style=${{width:'38px',height:'38px',borderRadius:'20px',background:T.ac+'22',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontFamily:"'DM Serif Display',serif",fontSize:'16px',color:T.ac}}>${c.nome[0]}</div>
+            <div><div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${c.nome}</div>${c.telefone?x`<div style=${{fontSize:'12px',color:T.sub}}>${c.telefone}</div>`:null}</div>
+            ${form.clienteId===String(c.id)?x`<div style=${{marginLeft:'auto'}}><${Ic} n="check" s=${20} c=${T.ac}/></div>`:null}
+          </button>
+        `)}
+      </div>
+      <${Btn} full=${true} onClick=${()=>{if(!form.clienteId)return toast('Selecione um cliente.','error');setStep(2)}}>Continuar →<//>
+    </div>`;
+    if(step===2)return x`<div>
+      <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 2 de 3 — Escolha os itens</p>
+      ${cardapio.length===0?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Configure o cardápio primeiro.</p>`:x`
+        <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
+          ${cardapio.map(item=>{const sel=itens.find(i=>i.id===item.id);return x`
+            <div style=${{background:sel?T.ac+'10':T.card,border:`2px solid ${sel?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
+              <button onClick=${()=>togItem(item)} style=${{flex:1,background:'none',border:'none',cursor:'pointer',textAlign:'left',padding:0}}>
+                <div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${item.nome}</div>
+                <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'15px',color:T.ac}}>${fmt(item.valor)}</div>
+              </button>
+              ${sel?x`
+                <div style=${{display:'flex',alignItems:'center',gap:'8px',flexShrink:0}}>
+                  <button onClick=${()=>setQtd(sel.id,sel.qtd-1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:'#f0e8df',border:'none',cursor:'pointer',fontSize:'20px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>−</button>
+                  <span style=${{fontWeight:700,fontSize:'16px',color:T.ac,minWidth:'22px',textAlign:'center'}}>${sel.qtd}</span>
+                  <button onClick=${()=>setQtd(sel.id,sel.qtd+1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:T.ac,border:'none',cursor:'pointer',fontSize:'20px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'#fff'}}>+</button>
+                </div>
+              `:x`<button onClick=${()=>togItem(item)} style=${{width:'34px',height:'34px',borderRadius:'10px',background:T.ac,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><${Ic} n="plus" s=${18} c="#fff"/></button>`}
+            </div>
+          `})}
+        </div>
+      `}
+      ${itens.length>0?x`
+        <div style=${{background:T.ac+'12',borderRadius:'14px',padding:'12px 16px',marginBottom:'16px'}}>
+          ${itens.map(it=>x`<div style=${{display:'flex',justifyContent:'space-between',fontSize:'13px',color:T.sub,marginBottom:'4px'}}><span>${it.qtd}x ${it.nome}</span><span>${fmt(it.valor*it.qtd)}</span></div>`)}
+          <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'18px',color:T.ac,marginTop:'8px',paddingTop:'8px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
+        </div>
+      `:null}
+      <div style=${{display:'flex',gap:'10px'}}>
+        <${Btn} variant="ghost" onClick=${()=>setStep(1)} full=${true}>← Voltar<//>
+        <${Btn} onClick=${()=>{if(itens.length===0)return toast('Adicione itens.','error');setStep(3)}} full=${true}>Continuar →<//>
+      </div>
+    </div>`;
+    return x`<div>
+      <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 3 de 3 — Confirmar</p>
+      <${Card} style=${{marginBottom:'12px'}}><div style=${{fontSize:'12px',color:T.sub,fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px',marginBottom:'6px'}}>Cliente</div><div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${cSel?.nome}</div><//>
+      <${Card} style=${{marginBottom:'12px'}}>
+        <div style=${{fontSize:'12px',color:T.sub,fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px',marginBottom:'8px'}}>Itens</div>
+        ${itens.map(it=>x`<div style=${{display:'flex',justifyContent:'space-between',fontSize:'14px',color:T.tx,marginBottom:'5px'}}><span>${it.qtd}x ${it.nome}</span><span style=${{color:T.ac,fontWeight:700}}>${fmt(it.valor*it.qtd)}</span></div>`)}
+        <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
+      <//>
+      <${Inp} label="Observações (opcional)" value=${form.obs} onInput=${e=>setForm({...form,obs:e.target.value})}/>
+      <div style=${{display:'flex',gap:'10px',marginTop:'4px'}}>
+        <${Btn} variant="ghost" onClick=${()=>setStep(2)} full=${true}>← Itens<//>
+        <${Btn} onClick=${save} full=${true}>✓ Criar pedido<//>
+      </div>
+    </div>`;
+  };
+  return x`<div>
+    <${SHead} title="Pedidos" right=${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${prtDia} disabled=${printing==='dia'}>${printing==='dia'?'...':'Imprimir dia'}<//>`:x`<${Btn} small=${true} variant="ghost" icon="print" onClick=${prtNav}>Imprimir<//>` }/>
+    <div style=${{display:'flex',alignItems:'center',gap:'10px',marginBottom:'16px'}}>
+      <input type="date" value=${filtroData} onInput=${e=>setFiltroData(e.target.value)} class="inp" style=${{flex:1}}/>
+      ${filtroData?x`<div style=${{background:T.card,borderRadius:'12px',padding:'10px 14px',border:`1px solid ${T.br}`,flexShrink:0}}><div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'15px',color:T.ac}}>${fmt(totDia)}</div><div style=${{fontSize:'11px',color:T.sub}}>${fil.length} pedido(s)</div></div>`:null}
+    </div>
+    ${fil.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum pedido nesta data.</div>`:x`
+      <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'90px'}}>
+        ${fil.map((p,i)=>x`
+          <${Card}>
+            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div style=${{flex:1}}>
+                <div style=${{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}}>
+                  <span style=${{background:T.ac,color:'#fff',borderRadius:'6px',padding:'2px 8px',fontSize:'11px',fontWeight:700}}>##${i+1}</span>
+                  <span style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${p.cliente}</span>
+                </div>
+                <div style=${{fontSize:'13px',color:T.sub}}>🍽 ${p.itens}</div>
+                ${p.obs?x`<div style=${{fontSize:'12px',color:T.sub,fontStyle:'italic'}}>📝 ${p.obs}</div>`:null}
+              </div>
+              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'18px',color:T.ac,fontWeight:700,flexShrink:0,marginLeft:'8px'}}>${fmt(p.valor)}</div>
+            </div>
+            <div style=${{display:'flex',gap:'8px',marginTop:'12px'}}>
+              ${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${()=>prtPedido(p)} disabled=${printing===p.id}>Cupom<//>`:null}
+              <button onClick=${()=>del(p.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
+            </div>
+          <//>
+        `)}
+      </div>
+    `}
+    <${FAB} onClick=${()=>{setStep(1);setSheet(true)}} label="Novo pedido"/>
+    ${sheet?x`<${Sheet} title="Novo Pedido" onClose=${reset} full=${true}>${stepView()}<//>`:null}
+  </div>`;
+}
+
+// ── CARDÁPIO ───────────────────────────────────────────────────────────────────
+function Cardapio({cardapio,setCardapio,toast}){
+  const[sheet,setSheet]=useState(null),[catF,setCatF]=useState('Todos');
+  const[form,setForm]=useState({nome:'',descricao:'',valor:'',categoria:'Marmita'});
+  const cats=['Marmita','Bebida','Sobremesa','Adicional','Outro'];
+  const openNew=()=>{setForm({nome:'',descricao:'',valor:'',categoria:'Marmita'});setSheet('new')};
+  const openEdit=c=>{setForm({nome:c.nome,descricao:c.descricao||'',valor:String(c.valor),categoria:c.categoria||'Marmita'});setSheet(c)};
+  const save=()=>{
+    if(!form.nome.trim())return toast('Informe o nome.','error');
+    if(!form.valor||isNaN(Number(form.valor)))return toast('Valor inválido.','error');
+    const list=sheet==='new'?[...cardapio,{...form,id:Date.now(),valor:Number(form.valor)}]:cardapio.map(c=>c.id===sheet.id?{...c,...form,valor:Number(form.valor)}:c);
+    DB.set('clauq:cardapio',list);setCardapio(list);setSheet(null);
+    toast(sheet==='new'?'Item adicionado!':'Atualizado!','success');
+  };
+  const del=id=>{
+    if(!confirm('Remover item?'))return;
+    const list=cardapio.filter(c=>c.id!==id);DB.set('clauq:cardapio',list);setCardapio(list);toast('Removido.','success');
+  };
+  const shown=catF==='Todos'?cardapio:cardapio.filter(c=>c.categoria===catF);
+  return x`<div>
+    <${SHead} title=${`Cardápio (${cardapio.length})`}/>
+    <div style=${{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px'}}>
+      ${['Todos',...cats].map(cat=>x`<button onClick=${()=>setCatF(cat)} style=${{background:catF===cat?T.ac:'#f0e8df',color:catF===cat?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'8px 16px',fontSize:'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${cat}</button>`)}
+    </div>
+    ${shown.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum item. Adicione!</div>`:x`
+      <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'90px'}}>
+        ${shown.map(item=>x`
+          <${Card}>
+            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div style=${{flex:1}}>
+                <div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${item.nome}</div>
+                ${item.descricao?x`<div style=${{fontSize:'13px',color:T.sub,marginTop:'2px'}}>${item.descricao}</div>`:null}
+                <span class="tag" style=${{marginTop:'6px'}}>${item.categoria}</span>
+              </div>
+              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,fontWeight:700,flexShrink:0,marginLeft:'10px'}}>${fmt(item.valor)}</div>
+            </div>
+            <div style=${{display:'flex',gap:'8px',marginTop:'10px'}}>
+              <button onClick=${()=>openEdit(item)} style=${{background:'#f0e8df',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:T.sub}}><${Ic} n="edit" s=${14} c=${T.sub}/>Editar</button>
+              <button onClick=${()=>del(item.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
+            </div>
+          <//>
+        `)}
+      </div>
+    `}
+    <${FAB} onClick=${openNew} label="Novo item"/>
+    ${sheet?x`
+      <${Sheet} title=${sheet==='new'?'Novo Item':'Editar Item'} onClose=${()=>setSheet(null)}>
+        <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
+        <${Inp} label="Descrição" value=${form.descricao} onInput=${e=>setForm({...form,descricao:e.target.value})}/>
+        <${Inp} label="Valor (R$) *" type="number" min="0" step="0.01" value=${form.valor} onInput=${e=>setForm({...form,valor:e.target.value})}/>
+        <div class="inp-wrap">
+          <label class="inp-label">Categoria</label>
+          <div style=${{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+            ${cats.map(c=>x`<button onClick=${()=>setForm({...form,categoria:c})} style=${{background:form.categoria===c?T.ac:'#f0e8df',color:form.categoria===c?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'9px 18px',fontSize:'14px',fontWeight:600,cursor:'pointer'}}>${c}</button>`)}
+          </div>
+        </div>
+        <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
+          <${Btn} variant="ghost" onClick=${()=>setSheet(null)} full=${true}>Cancelar<//>
+          <${Btn} onClick=${save} full=${true}>${sheet==='new'?'Adicionar':'Salvar'}<//>
+        </div>
+      <//>
+    `:null}
+  </div>`;
+}
+
+// ── RELATÓRIO ──────────────────────────────────────────────────────────────────
+function Relatorio({pedidos,printer,toast}){
+  const ma=mY(today()),ms=[...new Set(pedidos.map(p=>mY(p.data)))].sort().reverse();
+  const[mes,setMes]=useState(ma),[printing,setPrinting]=useState(false);
+  const lista=pedidos.filter(p=>mY(p.data)===mes),total=lista.reduce((s,p)=>s+Number(p.valor),0);
+  const pD={};lista.forEach(p=>{pD[p.data]=(pD[p.data]||0)+Number(p.valor)});
+  const dias=Object.keys(pD).sort(),mx=Math.max(...Object.values(pD),1);
+  const pC={};lista.forEach(p=>{pC[p.cliente]=(pC[p.cliente]||0)+Number(p.valor)});
+  const tC=Object.entries(pC).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const pI={};lista.forEach(p=>{(p.itens||'').split(', ').forEach(it=>{const m=it.match(/(\d+)x (.+)/);if(m)pI[m[2]]=(pI[m[2]]||0)+Number(m[1])})});
+  const tI=Object.entries(pI).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const btOn=printer.status==='on';
+  const prtT=async()=>{
+    setPrinting(true);
+    const[m,a]=mes.split('/'),nm=new Date(`${a}-${m}-01`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'RELATORIO MENSAL',bold:true},{type:'center',text:nm.toUpperCase()},{sep:true},{type:'left',text:`Pedidos: ${lista.length}`},{type:'left',text:`Faturamento: ${fmt(total)}`,bold:true},{type:'left',text:`Ticket medio: ${fmt(total/(lista.length||1))}`},{sep:true},{type:'left',text:'TOP CLIENTES:',bold:true},...tC.map(([n,v],i)=>({type:'left',text:`${i+1}. ${n.slice(0,15).padEnd(15)} ${fmt(v)}`})),{sep:true},{type:'left',text:'MAIS PEDIDOS:',bold:true},...tI.map(([n,q],i)=>({type:'left',text:`${i+1}. ${n.slice(0,20).padEnd(20)} ${q}x`})),{sep:true},{type:'center',text:'Sistema ClauQ'},{type:'center',text:' '}];
+    const res=await printer.print(buildReceipt(lines));toast(res.ok?'Relatório impresso!':'Erro: '+res.err,res.ok?'success':'error');setPrinting(false);
+  };
+  const prtN=()=>{
+    const[m,a]=mes.split('/'),nm=new Date(`${a}-${m}-01`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    const w=window.open('','_blank');
+    w.document.write(`<html><head><title>Relatório</title><style>body{font-family:Georgia,serif;padding:20px}table{width:100%;border-collapse:collapse}th{background:#f5e6d3;padding:8px;text-align:left}td{padding:8px;border-bottom:1px solid #eee}</style></head><body><h2>📊 Sistema ClauQ — ${nm}</h2><p>Pedidos: ${lista.length} | Faturamento: R$ ${total.toFixed(2)}</p><h3>Top Clientes</h3><table><thead><tr><th>Cliente</th><th>Total</th></tr></thead><tbody>${tC.map(([n,v])=>`<tr><td>${n}</td><td>R$ ${v.toFixed(2)}</td></tr>`).join('')}</tbody></table><script>window.print()<\/script></body></html>`);
+    w.document.close();
+  };
+  return x`<div>
+    <${SHead} title="Relatório" right=${x`<select value=${mes} onChange=${e=>setMes(e.target.value)} class="inp" style=${{width:'auto',padding:'8px 12px'}}>${ms.length===0?x`<option value=${ma}>${ma}</option>`:ms.map(m=>x`<option key=${m}>${m}</option>`)}</select>`}/>
+    ${lista.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum pedido neste mês.</div>`:x`
+      <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'16px'}}>
+        ${[{lb:'Pedidos',v:lista.length,co:'#3d7a5f'},{lb:'Faturamento',v:fmt(total),co:T.ac},{lb:'Ticket médio',v:fmt(total/lista.length),co:'#a05a20'},{lb:'Dias ativos',v:dias.length,co:'#5c3d8a'}].map(m=>x`
+          <${Card} style=${{padding:'14px 16px'}}><div style=${{fontFamily:"'DM Serif Display',serif",fontSize:m.v.toString().length>7?'15px':'19px',color:m.co,fontWeight:700}}>${m.v}</div><div style=${{fontSize:'12px',color:T.sub,marginTop:'3px'}}>${m.lb}</div><//>
+        `)}
+      </div>
+      ${dias.length>0?x`
+        <${Card} style=${{marginBottom:'14px',padding:'16px'}}>
+          <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'12px'}}>Faturamento por dia</div>
+          <div style=${{display:'flex',alignItems:'flex-end',gap:'4px',height:'70px',overflowX:'auto'}}>
+            ${dias.map(dia=>{const v=pD[dia],h=Math.max(6,(v/mx)*60);return x`
+              <div style=${{flex:1,minWidth:'20px',display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}}>
+                <div style=${{width:'100%',height:`${h}px`,background:T.ac,borderRadius:'4px 4px 0 0'}} title=${`${dia}: ${fmt(v)}`}/>
+                <div style=${{fontSize:'8px',color:T.sub}}>${dia.slice(8)}</div>
+              </div>
+            `})}
+          </div>
+        <//>
+      `:null}
+      ${tC.length>0?x`
+        <${Card} style=${{marginBottom:'10px'}}>
+          <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'10px'}}>🏆 Top Clientes</div>
+          ${tC.map(([nome,val],i)=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:i<tC.length-1?`1px solid ${T.br}`:'none'}}><span style=${{fontSize:'14px',color:T.tx}}>${['🥇','🥈','🥉'][i]||`${i+1}.`} ${nome}</span><span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'14px',color:T.ac}}>${fmt(val)}</span></div>`)}
+        <//>
+      `:null}
+      ${tI.length>0?x`
+        <${Card} style=${{marginBottom:'90px'}}>
+          <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'10px'}}>🍽 Mais pedidos</div>
+          ${tI.map(([nome,qtd],i)=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:i<tI.length-1?`1px solid ${T.br}`:'none'}}><span style=${{fontSize:'14px',color:T.tx}}>${i+1}. ${nome}</span><span style=${{fontSize:'13px',color:T.ac,fontWeight:700}}>${qtd}x</span></div>`)}
+        <//>
+      `:null}
+      <div style=${{position:'fixed',bottom:'72px',left:0,right:0,maxWidth:'480px',margin:'0 auto',padding:'0 16px'}}>
+        ${btOn?x`<${Btn} full=${true} variant="green" icon="print" onClick=${prtT} disabled=${printing}>${printing?'Imprimindo...':'🖨 Imprimir na térmica'}<//>`:x`<${Btn} full=${true} variant="ghost" icon="print" onClick=${prtN}>Imprimir relatório<//>` }
+      </div>
+    `}
+  </div>`;
+}
+
+// ── BLUETOOTH ──────────────────────────────────────────────────────────────────
+function BTSetup({printer}){
+  const{status,name,connect,disconnect}=printer,[loading,setLoading]=useState(false),[err,setErr]=useState(null);
+  const co={on:'#3d7a5f',connecting:'#a05a20',off:'#8a6a50',error:'#c1440e'}[status];
+  const lb={on:`Conectado: ${name}`,connecting:'Conectando...',off:'Desconectado',error:'Erro de conexão'}[status];
+  const hConn=async()=>{setLoading(true);setErr(null);const res=await connect();if(!res.ok)setErr(res.err);setLoading(false)};
+  return x`<div style=${{paddingBottom:'90px'}}>
+    <${Card} style=${{marginBottom:'20px'}}>
+      <div style=${{display:'flex',alignItems:'center',gap:'14px'}}>
+        <div style=${{width:'48px',height:'48px',borderRadius:'14px',background:co+'18',display:'flex',alignItems:'center',justifyContent:'center'}}><${Ic} n=${status==='on'?'wifi':'nobt'} s=${24} c=${co}/></div>
+        <div><div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>Impressora Térmica</div><div style=${{fontSize:'13px',color:co,marginTop:'2px'}}>${lb}</div></div>
+      </div>
+    <//>
+    ${err?x`<div style=${{background:'#fff0f0',border:'1px solid #fca5a5',borderRadius:'12px',padding:'12px 16px',marginBottom:'16px',fontSize:'13px',color:'#c1440e'}}>⚠️ ${err}</div>`:null}
+    <${Card} style=${{marginBottom:'20px'}}>
+      <div style=${{fontWeight:700,fontSize:'15px',color:T.tx,marginBottom:'12px'}}>Como conectar</div>
+      ${[{n:'1',t:'Ligue a impressora térmica.'},{n:'2',t:'Pareie no Bluetooth do celular (Configurações → Bluetooth).'},{n:'3',t:'Toque em "Conectar" abaixo e selecione na lista.'},{n:'4',t:'Pronto! Use o botão 🖨 nos pedidos.'}].map(s=>x`
+        <div style=${{display:'flex',gap:'12px',marginBottom:'12px'}}>
+          <div style=${{width:'28px',height:'28px',borderRadius:'14px',background:T.ac,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:'13px',flexShrink:0}}>${s.n}</div>
+          <div style=${{fontSize:'14px',color:T.tx,paddingTop:'4px'}}>${s.t}</div>
+        </div>
+      `)}
+      <div style=${{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:'10px',padding:'10px 14px',marginTop:'4px',fontSize:'12px',color:'#92400e'}}>⚠️ Web Bluetooth funciona no <strong>Chrome para Android</strong>. No iPhone, use a impressão normal.</div>
+    <//>
+    <div style=${{position:'fixed',bottom:'72px',left:0,right:0,maxWidth:'480px',margin:'0 auto',padding:'0 16px'}}>
+      ${status==='on'?x`<${Btn} full=${true} variant="danger" icon="nobt" onClick=${disconnect}>Desconectar impressora<//>`:x`<${Btn} full=${true} variant="green" icon="wifi" onClick=${hConn} disabled=${loading||status==='connecting'}>${loading||status==='connecting'?'Procurando...':'Conectar impressora'}<//>` }
+    </div>
+  </div>`;
+}
+
+// ── APP ────────────────────────────────────────────────────────────────────────
+function App(){
+  const[screen,setScreen]=useState('home');
+  const[clientes,setClientes]=useState([]);
+  const[pedidos,setPedidos]=useState([]);
+  const[cardapio,setCardapio]=useState([]);
+  const[toast,setToast]=useState(null);
+  const printer=usePrinter();
+  const showToast=(msg,type='success')=>setToast({msg,type,id:Date.now()});
+  useEffect(()=>{
+    setClientes(DB.get('clauq:clientes')||[]);
+    setPedidos(DB.get('clauq:pedidos')||[]);
+    setCardapio(DB.get('clauq:cardapio')||[]);
+  },[]);
+  const NAV=[{id:'home',lb:'Início',ic:'home'},{id:'clientes',lb:'Clientes',ic:'users'},{id:'pedidos',lb:'Pedidos',ic:'cart'},{id:'cardapio',lb:'Cardápio',ic:'menu'},{id:'relatorio',lb:'Relatório',ic:'chart'}];
+  const btOn=printer.status==='on';
+  return x`<div style=${{display:'flex',flexDirection:'column',height:'100%'}}>
+    <header style=${{background:T.hdr,padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
+      <div style=${{display:'flex',alignItems:'center',gap:'10px'}}>
+        <span style=${{fontSize:'22px'}}>🍱</span>
+        <div>
+          <div style=${{fontFamily:"'DM Serif Display',serif",color:'#fdf0df',fontSize:'18px',lineHeight:1.1}}>Sistema ClauQ</div>
+          ${screen!=='home'?x`<div style=${{fontSize:'11px',color:'#c8a070'}}>${NAV.find(n=>n.id===screen)?.lb||'Bluetooth'}</div>`:null}
+        </div>
+      </div>
+      <button onClick=${()=>setScreen('bluetooth')} style=${{background:btOn?'#0f3321':'rgba(255,255,255,.1)',border:'none',borderRadius:'20px',padding:'7px 13px',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer'}}>
+        <${Ic} n=${btOn?'wifi':'nobt'} s=${15} c=${btOn?'#4ade80':'#c8a070'}/>
+        <span style=${{fontSize:'11px',color:btOn?'#4ade80':'#c8a070'}}>${btOn?printer.name?.split(' ')[0]||'BT':'BT'}</span>
+      </button>
+    </header>
+    <main style=${{flex:1,padding:'16px 16px 0',overflowY:'auto'}}>
+      ${screen==='home'?x`<${Home} clientes=${clientes} pedidos=${pedidos} setScreen=${setScreen}/>`:null}
+      ${screen==='clientes'?x`<${Clientes} clientes=${clientes} setClientes=${setClientes} toast=${showToast}/>`:null}
+      ${screen==='pedidos'?x`<${Pedidos} clientes=${clientes} pedidos=${pedidos} setPedidos=${setPedidos} cardapio=${cardapio} toast=${showToast} printer=${printer}/>`:null}
+      ${screen==='cardapio'?x`<${Cardapio} cardapio=${cardapio} setCardapio=${setCardapio} toast=${showToast}/>`:null}
+      ${screen==='relatorio'?x`<${Relatorio} pedidos=${pedidos} printer=${printer} toast=${showToast}/>`:null}
+      ${screen==='bluetooth'?x`<${BTSetup} printer=${printer}/>`:null}
+    </main>
+    <nav class="nav">
+      ${NAV.map(n=>{const active=screen===n.id;return x`
+        <button class="nav-btn" onClick=${()=>setScreen(n.id)}>
+          <div class="nav-icon" style=${{background:active?T.ac+'18':'transparent'}}><${Ic} n=${n.ic} s=${20} c=${active?T.ac:T.sub} sw=${active?2.5:2}/></div>
+          <span style=${{fontSize:'10px',fontWeight:active?700:500,color:active?T.ac:T.sub}}>${n.lb}</span>
+        </button>
+      `})}
+    </nav>
+    ${toast?x`<${Toast} key=${toast.id} msg=${toast.msg} type=${toast.type} onDone=${()=>setToast(null)}/>`:null}
+  </div>`;
+}
+
+render(x`<${App}/>`,document.getElementById('app'));
+</script>
+</body>
+</html>
