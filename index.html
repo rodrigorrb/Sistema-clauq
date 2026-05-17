@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+  <!-- PWA / App meta -->
+  <title>Sistema ClauQ</title>
+  <meta name="description" content="Sistema de gerenciamento para marmitaria" />
+  <meta name="theme-color" content="#1c0f00" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- iOS Safari PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ClauQ" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root {
+      height: 100%;
+      background: #1c0f00;
+      overflow: hidden;
+    }
+    #root {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh; /* dynamic viewport height — handles mobile browser chrome */
+    }
+    /* Prevent text selection on tap */
+    * { -webkit-user-select: none; user-select: none; }
+    input, textarea { -webkit-user-select: text; user-select: text; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(r => console.log('SW registered:', r.scope))
+          .catch(e => console.error('SW error:', e));
+      });
+    }
+
+    // PWA install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Opcional: mostrar botão de instalação customizado
+    });
+  </script>
+
+  <!-- Vite / CRA inject script here -->
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
