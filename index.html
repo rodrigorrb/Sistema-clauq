@@ -217,11 +217,12 @@ function usePrinter(){
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
 const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const today=()=>new Date().toISOString().split('T')[0];
+const today=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const mY=d=>{const dt=new Date(d+'T12:00:00');return`${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`};
 const getTurno=()=>new Date().getHours()>=5&&new Date().getHours()<15?'☀️ Almoço':'🌙 Janta';
 const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
 const fmtTime=iso=>{try{return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}catch{return'--:--'}};
+const maskPhone=v=>{const d=v.replace(/\D/g,'').slice(0,11);if(d.length<=2)return d.length===0?'':d;if(d.length<=7)return`(${d.slice(0,2)}) ${d.slice(2)}`;if(d.length<=10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`};
 function dlFile(content,name,type){
   const blob=new Blob([typeof content==='string'?'\ufeff'+content:content],{type});
   const url=URL.createObjectURL(blob);
@@ -401,7 +402,7 @@ function Clientes({clientes,setClientes,toast}){
     <${FAB} onClick=${()=>{setForm({nome:'',telefone:'',endereco:'',obs:''});setSheet('new')}} label="Novo cliente"/>
     ${sheet?x`<${Sheet} title=${sheet==='new'?'Novo Cliente':'Editar Cliente'} onClose=${()=>setSheet(null)}>
       <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
-      <${Inp} label="Telefone" type="tel" value=${form.telefone} onInput=${e=>setForm({...form,telefone:e.target.value})}/>
+      <${Inp} label="Telefone" type="tel" value=${form.telefone} maxlength="15" placeholder="(11) 99999-9999" onInput=${e=>setForm({...form,telefone:maskPhone(e.target.value)})}/>
       <${Inp} label="Endereço" value=${form.endereco} onInput=${e=>setForm({...form,endereco:e.target.value})}/>
       <${Inp} label="Obs" as="textarea" value=${form.obs} onInput=${e=>setForm({...form,obs:e.target.value})}/>
       <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
@@ -417,6 +418,7 @@ function Clientes({clientes,setClientes,toast}){
 // ═══════════════════════════════════════════════════════════════
 function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   const[filtroData,setFiltroData]=useState(today());
+  const[filtroStatus,setFiltroStatus]=useState('entregar');
   const[sheet,setSheet]=useState(false);
   const[step,setStep]=useState(1);
   // ★ clienteId separado — evita stale closure no botão Continuar
@@ -425,9 +427,12 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   const[itens,setItens]=useState([]);
   const[printing,setPrinting]=useState(null);
 
-  const fil=pedidos.filter(p=>!filtroData||p.data===filtroData);
-  const totDia=fil.reduce((s,p)=>s+Number(p.valor),0);
-  const pagosDia=fil.filter(p=>p.pago).reduce((s,p)=>s+Number(p.valor),0);
+  const filDia=pedidos.filter(p=>!filtroData||p.data===filtroData);
+  const fil=filtroStatus==='entregar'?filDia.filter(p=>!p.entregue):filDia.filter(p=>!!p.entregue);
+  const nEntregar=filDia.filter(p=>!p.entregue).length;
+  const nEntregues=filDia.filter(p=>!!p.entregue).length;
+  const totDia=filDia.reduce((s,p)=>s+Number(p.valor),0);
+  const pagosDia=filDia.filter(p=>p.pago).reduce((s,p)=>s+Number(p.valor),0);
   const btOn=printer.status==='on'||printer.mode==='window';
   const totIt=itens.reduce((s,i)=>s+i.valor*i.qtd,0);
   const cSel=clientes.find(c=>String(c.id)===clienteId);
@@ -440,10 +445,15 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
     const list=pedidos.map(p=>p.id===id?{...p,pago:!p.pago}:p);
     await DB.set('clauq:pedidos',list);setPedidos(list);
   };
+  const toggleEntregue=async id=>{
+    const list=pedidos.map(p=>p.id===id?{...p,entregue:!p.entregue}:p);
+    await DB.set('clauq:pedidos',list);setPedidos(list);
+    toast(list.find(p=>p.id===id)?.entregue?'Marcado como entregue! ✅':'Devolvido para pendentes.','success');
+  };
   const save=async()=>{
     if(!clienteId||!cSel)return toast('Selecione um cliente.','error');
     if(itens.length===0)return toast('Adicione pelo menos 1 item.','error');
-    const pedido={id:Date.now(),clienteId:Number(clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,...form};
+    const pedido={id:Date.now(),clienteId:Number(clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,...form,entregue:false};
     const list=[...pedidos,pedido];
     await DB.set('clauq:pedidos',list);setPedidos(list);toast('Pedido criado!','success');reset();
   };
@@ -458,8 +468,9 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
     if(todos){
       const df=new Date((filtroData||today())+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
       const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'PEDIDOS DO DIA',bold:true},{type:'center',text:df},{sep:true}];
-      fil.forEach((pp,i)=>{lines.push({type:'left',text:`#${i+1} ${pp.cliente} ${pp.turno||''}`,bold:true});lines.push({type:'left',text:pp.itens});if(pp.obs)lines.push({type:'left',text:`Obs: ${pp.obs}`});lines.push({type:'right',text:`${fmt(pp.valor)} ${pp.pago?'[PAGO]':'[PEND]'}`});lines.push({sep:true})});
-      lines.push({type:'right',text:`TOTAL: ${fmt(totDia)}`,bold:true},{type:'right',text:`Recebido: ${fmt(pagosDia)}`},{type:'center',text:' '});
+      filDia.forEach((pp,i)=>{lines.push({type:'left',text:`#${i+1} ${pp.cliente} ${pp.turno||''}`,bold:true});lines.push({type:'left',text:pp.itens});if(pp.obs)lines.push({type:'left',text:`Obs: ${pp.obs}`});lines.push({type:'right',text:`${fmt(pp.valor)} ${pp.pago?'[PAGO]':'[PEND]'}`});lines.push({sep:true})});
+      const tD=filDia.reduce((s,p)=>s+Number(p.valor),0);const pD2=filDia.filter(p=>p.pago).reduce((s,p)=>s+Number(p.valor),0);
+      lines.push({type:'right',text:`TOTAL: ${fmt(tD)}`,bold:true},{type:'right',text:`Recebido: ${fmt(pD2)}`},{type:'center',text:' '});
       return lines;
     }
     return[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:`${fmtDate(p.data)}  ${hora}`},{type:'center',text:p.turno||''},{sep:true},{type:'left',text:`Cliente: ${p.cliente}`,bold:true},{sep:true},
@@ -566,15 +577,22 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
 
   return x`<div>
     <${SHead} title="Pedidos" right=${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${()=>prt(null,true)} disabled=${printing==='dia'}>${printing==='dia'?'...':'Imprimir dia'}<//>`:x`<${Btn} small=${true} variant="ghost" icon="print" onClick=${()=>printViaWindow(mkLines(null,true))}>Imprimir<//>` }/>
-    <div style=${{display:'flex',alignItems:'center',gap:'10px',marginBottom:'16px'}}>
+    <div style=${{display:'flex',alignItems:'center',gap:'10px',marginBottom:'12px'}}>
       <input type="date" value=${filtroData} onInput=${e=>setFiltroData(e.target.value)} class="inp" style=${{flex:1}}/>
       ${filtroData?x`<div style=${{background:T.card,borderRadius:'12px',padding:'10px 14px',border:`1px solid ${T.br}`,flexShrink:0,minWidth:'110px'}}>
         <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'14px',color:T.ac}}>${fmt(totDia)}</div>
-        <div style=${{fontSize:'10px',color:T.sub}}>${fil.length} pedido(s)</div>
+        <div style=${{fontSize:'10px',color:T.sub}}>${filDia.length} pedido(s)</div>
         <div style=${{fontSize:'10px',color:'#3d7a5f',fontWeight:600}}>✓ ${fmt(pagosDia)}</div>
       </div>`:null}
     </div>
-    ${fil.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum pedido nesta data.</div>`:x`
+    <div style=${{display:'flex',gap:'8px',marginBottom:'14px'}}>
+      ${[{v:'entregar',l:'🚚 A Entregar',n:nEntregar},{v:'entregues',l:'✅ Entregues',n:nEntregues}].map(s=>x`
+        <button key=${s.v} onClick=${()=>setFiltroStatus(s.v)} style=${{flex:1,padding:'10px',borderRadius:'12px',border:`2px solid ${filtroStatus===s.v?T.ac:T.br}`,background:filtroStatus===s.v?T.ac+'12':T.card,fontWeight:700,fontSize:'13px',cursor:'pointer',color:filtroStatus===s.v?T.ac:T.sub,display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}}>
+          ${s.l} <span style=${{background:filtroStatus===s.v?T.ac:'#e8ddd0',color:filtroStatus===s.v?'#fff':T.sub,borderRadius:'10px',padding:'1px 7px',fontSize:'11px'}}>${s.n}</span>
+        </button>
+      `)}
+    </div>
+    ${fil.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>${filtroStatus==='entregar'?'Todos os pedidos entregues! ✅':'Nenhum pedido entregue hoje.'}</div>`:x`
       <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'90px'}}>
         ${fil.map((p,i)=>x`<${Card} key=${p.id}>
           <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
@@ -594,6 +612,10 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
           </div>
           <div style=${{display:'flex',gap:'8px',marginTop:'12px'}}>
             ${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${()=>prt(p)} disabled=${printing===p.id}>Cupom<//>`:null}
+            ${filtroStatus==='entregar'
+              ?x`<button onClick=${()=>toggleEntregue(p.id)} style=${{background:'#f0fdf4',border:'1px solid #86efac',borderRadius:'9px',padding:'8px 12px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:700,color:'#166534'}}>🚚 Entregar</button>`
+              :x`<button onClick=${()=>toggleEntregue(p.id)} style=${{background:'#f0e8df',border:'none',borderRadius:'9px',padding:'8px 12px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:T.sub}}>↩ Desfazer</button>`
+            }
             <button onClick=${()=>del(p.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 12px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
           </div>
         <//>`) }
@@ -694,6 +716,24 @@ function Relatorio({pedidos,setPedidos,printer,toast}){
   const totalDev=devedores.reduce((s,d)=>s+d.total,0);
 
   const marcarPago=async id=>{const list=pedidos.map(p=>p.id===id?{...p,pago:true}:p);await DB.set('clauq:pedidos',list);setPedidos(list);toast('Marcado como pago!','success')};
+  const prtDevedores=()=>{
+    const periodoLabel={hoje:'Hoje',semana:'Esta semana',mes:'Este mês',geral:'Geral'}[dvPeriodo];
+    const lines=[
+      {type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},
+      {type:'center',text:'RELATORIO DE DEVEDORES',bold:true},
+      {type:'center',text:periodoLabel},{sep:true},
+    ];
+    devedores.forEach(d=>{
+      lines.push({type:'left',text:d.nome,bold:true});
+      d.pedidos.forEach(p=>{lines.push({type:'left',text:`${fmtDate(p.data)} ${p.turno||''}`});lines.push({type:'left',text:p.itens});lines.push({type:'right',text:fmt(p.valor)})});
+      lines.push({type:'right',text:`Subtotal: ${fmt(d.total)}`,bold:true});lines.push({sep:true});
+    });
+    lines.push({type:'right',text:`TOTAL DEVEDOR: ${fmt(totalDev)}`,bold:true,double:true});
+    lines.push({type:'center',text:`${devedores.length} cliente(s) | ${pedsDev.length} pedido(s)`});
+    lines.push({type:'center',text:' '});
+    const data=buildReceipt(lines);
+    printer.print(data,lines).then(res=>toast(res.ok?'Relatório impresso!':'Erro: '+res.err,res.ok?'success':'error'));
+  };
   const marcarTodos=async ids=>{const s=new Set(ids);const list=pedidos.map(p=>s.has(p.id)?{...p,pago:true}:p);await DB.set('clauq:pedidos',list);setPedidos(list);toast('Quitado!','success')};
   const btOn=printer.status==='on'||printer.mode==='window';
 
@@ -753,10 +793,13 @@ function Relatorio({pedidos,setPedidos,printer,toast}){
       `}
     </div>`:null}
     ${tab==='devedores'?x`<div>
-      <div style=${{display:'flex',gap:'8px',marginBottom:'16px',overflowX:'auto',paddingBottom:'4px'}}>
-        ${[{v:'hoje',l:'Hoje'},{v:'semana',l:'Semana'},{v:'mes',l:'Este mês'},{v:'geral',l:'Geral'}].map(p=>x`
+      <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px',gap:'10px'}}>
+        <div style=${{display:'flex',gap:'8px',overflowX:'auto',paddingBottom:'4px',flex:1}}>
+          ${[{v:'hoje',l:'Hoje'},{v:'semana',l:'Semana'},{v:'mes',l:'Este mês'},{v:'geral',l:'Geral'}].map(p=>x`
           <button key=${p.v} onClick=${()=>setDvPeriodo(p.v)} style=${{background:dvPeriodo===p.v?T.ac:'#f0e8df',color:dvPeriodo===p.v?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'8px 18px',fontSize:'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${p.l}</button>
         `)}
+        </div>
+        ${devedores.length>0?x`<${Btn} small=${true} variant=${btOn?'green':'ghost'} icon="print" onClick=${prtDevedores}>🖨<//>`:null}
       </div>
       ${devedores.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>✅ Nenhum devedor neste período!</div>`:x`
         <${Card} style=${{marginBottom:'14px',background:'#fff7ed',border:'1px solid #fed7aa'}}>
