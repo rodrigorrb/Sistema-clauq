@@ -17,53 +17,127 @@ input,select,textarea{font-family:'DM Sans',sans-serif;font-size:15px}
 ::-webkit-scrollbar{display:none}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.sheet-overlay{position:fixed;inset:0;background:rgba(28,15,0,.55);z-index:500;display:flex;flex-direction:column;justify-content:flex-end}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.sheet-ov{position:fixed;inset:0;background:rgba(28,15,0,.55);z-index:500;display:flex;flex-direction:column;justify-content:flex-end}
 .sheet{background:#faf5ee;border-radius:20px 20px 0 0;max-height:92vh;display:flex;flex-direction:column;animation:slideUp .25s ease-out;position:relative}
 .sheet.full{max-height:97vh}
-.sheet-body{overflow-y:auto;padding:0 20px 48px;flex:1}
+.sheet-body{overflow-y:auto;padding:0 20px 52px;flex:1}
 .handle{display:flex;justify-content:center;padding:12px 0 0}
-.handle-bar{width:40px;height:4px;border-radius:2px;background:#e8ddd0}
-.sheet-title{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 14px}
+.hbar{width:40px;height:4px;border-radius:2px;background:#e8ddd0}
+.stitle{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 14px}
 .nav{background:#fff;border-top:1px solid #e8ddd0;display:flex;padding:6px 0 8px;flex-shrink:0;box-shadow:0 -4px 20px rgba(28,15,0,.08)}
 .nav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer}
-.nav-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.toast{position:fixed;bottom:82px;left:12px;right:12px;color:#fff;padding:13px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.25);font-size:14px;font-weight:500;animation:slideUp .2s ease-out}
+.nav-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.toast{position:fixed;bottom:82px;left:12px;right:12px;color:#fff;padding:13px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.25);font-size:14px;font-weight:500;animation:slideUp .2s ease-out;max-width:456px;margin:0 auto}
 .card{background:#fff;border-radius:16px;padding:15px 16px;box-shadow:0 2px 16px rgba(28,15,0,.08);border:1px solid #e8ddd0}
 .fab{position:fixed;bottom:76px;right:16px;background:#d4522a;color:#fff;border:none;border-radius:20px;padding:13px 18px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(212,82,42,.45);cursor:pointer;z-index:200;font-family:'DM Sans',sans-serif}
-.inp-wrap{margin-bottom:14px}
-.inp-label{display:block;font-size:12px;font-weight:600;color:#8a6a50;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .inp{width:100%;padding:13px 15px;border-radius:12px;border:1.5px solid #e8ddd0;background:#fdf8f3;color:#1c0f00;outline:none}
 .inp:focus{border-color:#d4522a}
-.btn{border:none;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;justify-content:center;transition:opacity .15s}
+.inp-lbl{display:block;font-size:12px;font-weight:600;color:#8a6a50;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.btn{border:none;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;justify-content:center}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-primary{background:#d4522a;color:#fff;box-shadow:0 4px 14px rgba(212,82,42,.35)}
-.btn-green{background:#3d7a5f;color:#fff;box-shadow:0 4px 14px rgba(61,122,95,.3)}
+.btn-primary{background:#d4522a;color:#fff;box-shadow:0 4px 14px rgba(212,82,42,.3)}
+.btn-green{background:#3d7a5f;color:#fff;box-shadow:0 4px 14px rgba(61,122,95,.25)}
 .btn-ghost{background:#f0e8df;color:#8a6a50}
 .btn-danger{background:#7f1d1d;color:#fff}
+.btn-blue{background:#1d4ed8;color:#fff}
 .btn-lg{padding:14px 22px;font-size:15px}
-.btn-sm{padding:9px 16px;font-size:13px}
+.btn-sm{padding:8px 14px;font-size:13px}
 .btn-full{width:100%}
-.tag{display:inline-block;background:#f0e8df;color:#8a6a50;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600}
+.tab{display:flex;background:#f0e8df;border-radius:12px;padding:4px;margin-bottom:16px}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#8a6a50}
+.tab-btn.active{background:#fff;color:#d4522a;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+.pago-btn{border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.info-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:12px;color:#92400e}
+.err-box{background:#fff0f0;border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;font-size:13px;color:#c1440e}
+.sep{height:1px;background:#e8ddd0;margin:20px 0}
+.saving-dot{width:8px;height:8px;border-radius:50%;animation:blink 1.5s infinite}
+@media print{.no-print{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
-<div id="app"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1c0f00;gap:12px"><span style="font-size:52px">🍱</span><span style="font-family:'DM Serif Display',serif;font-size:24px;color:#fdf0df">Sistema ClauQ</span><span style="font-size:13px;color:#c8a070">Carregando...</span></div></div>
+<div id="app"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1c0f00;gap:12px">
+  <span style="font-size:52px">🍱</span>
+  <span style="font-family:'DM Serif Display',serif;font-size:24px;color:#fdf0df">Sistema ClauQ</span>
+  <span style="font-size:13px;color:#c8a070">Carregando...</span>
+</div></div>
 <script type="module">
 import{h,render}from'https://esm.sh/preact@10.22.0';
 import{useState,useEffect,useRef,useCallback}from'https://esm.sh/preact@10.22.0/hooks';
 import htm from'https://esm.sh/htm@3.1.1';
 const x=htm.bind(h);
 
-// ── Storage ──────────────────────────────────────────────────────────────────
-const DB={
-  get:k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}},
-  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+// ═══════════════════════════════════════════════════════════════
+// OPFS — Origin Private File System (backup automático persistente)
+// Sobrevive a limpeza de cache do navegador
+// ═══════════════════════════════════════════════════════════════
+const OPFS={
+  get ok(){return!!navigator.storage?.getDirectory},
+  async read(){
+    if(!this.ok)return null;
+    try{
+      const root=await navigator.storage.getDirectory();
+      const fh=await root.getFileHandle('clauq-data.json');
+      const file=await fh.getFile();
+      return JSON.parse(await file.text());
+    }catch{return null;}
+  },
+  async write(data){
+    if(!this.ok)return false;
+    try{
+      const root=await navigator.storage.getDirectory();
+      const fh=await root.getFileHandle('clauq-data.json',{create:true});
+      const ws=await fh.createWritable();
+      await ws.write(JSON.stringify({...data,savedAt:new Date().toISOString()}));
+      await ws.close();
+      return true;
+    }catch{return false;}
+  }
 };
 
-// ── ESC/POS ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// IndexedDB — banco local rápido (camada secundária)
+// ═══════════════════════════════════════════════════════════════
+let _idb=null;
+async function getIDB(){
+  if(_idb)return _idb;
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open('clauq-db',1);
+    r.onupgradeneeded=e=>e.target.result.createObjectStore('kv');
+    r.onsuccess=e=>{_idb=e.target.result;res(_idb)};
+    r.onerror=rej;
+  });
+}
+const DB={
+  async get(k){
+    try{const db=await getIDB();return new Promise((res,rej)=>{const r=db.transaction('kv','readonly').objectStore('kv').get(k);r.onsuccess=()=>res(r.result??null);r.onerror=rej})}
+    catch{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}}
+  },
+  async set(k,v){
+    try{const db=await getIDB();await new Promise((res,rej)=>{const r=db.transaction('kv','readwrite').objectStore('kv').put(v,k);r.onsuccess=res;r.onerror=rej})}
+    catch{}
+    try{localStorage.setItem(k,JSON.stringify(v))}catch{}
+  },
+  // Exportar JSON para download manual
+  async exportJSON(c,p,ca){
+    const d={clientes:c,pedidos:p,cardapio:ca,exportedAt:new Date().toISOString()};
+    dlFile(JSON.stringify(d,null,2),'clauq-backup.json','application/json');
+  },
+  async importJSON(file,sc,sp,sca){
+    const d=JSON.parse(await file.text());
+    await Promise.all([DB.set('clauq:clientes',d.clientes||[]),DB.set('clauq:pedidos',d.pedidos||[]),DB.set('clauq:cardapio',d.cardapio||[])]);
+    await OPFS.write({clientes:d.clientes||[],pedidos:d.pedidos||[],cardapio:d.cardapio||[]});
+    sc(d.clientes||[]);sp(d.pedidos||[]);sca(d.cardapio||[]);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ESC/POS
+// ═══════════════════════════════════════════════════════════════
 const E=0x1B,G=0x1D;
-const ep={I:[E,0x40],C:[G,0x56,0x41,0x10],L:[0x0A],CE:[E,0x61,0x01],LE:[E,0x61,0x00],RI:[E,0x61,0x02],BO:[E,0x45,0x01],BF:[E,0x45,0x00],DO:[E,0x21,0x30],DF:[E,0x21,0x00],
-  SEP:()=>Array.from("--------------------------------").map(c=>c.charCodeAt(0)),
+const ep={I:[E,0x40],C:[G,0x56,0x41,0x10],L:[0x0A],CE:[E,0x61,0x01],LE:[E,0x61,0x00],RI:[E,0x61,0x02],
+  BO:[E,0x45,0x01],BF:[E,0x45,0x00],DO:[E,0x21,0x30],DF:[E,0x21,0x00],
+  SEP:()=>Array.from('--------------------------------').map(c=>c.charCodeAt(0)),
   LN:s=>[...Array.from(s).map(c=>{const n=c.charCodeAt(0);return n>127?63:n}),0x0A]
 };
 function buildReceipt(lines){
@@ -76,8 +150,21 @@ function buildReceipt(lines){
   }
   b.push(...ep.L,...ep.L,...ep.L,...ep.C);return new Uint8Array(b);
 }
+function printViaWindow(lines){
+  const rows=lines.map(l=>{
+    if(l.sep)return'<hr style="border:1px dashed #000;margin:3px 0"/>';
+    const al=l.type==='center'?'center':l.type==='right'?'right':'left';
+    const st=[l.bold&&'font-weight:700',l.double&&'font-size:16px'].filter(Boolean).join(';');
+    return`<div style="text-align:${al};${st}">${l.text||'&nbsp;'}</div>`;
+  }).join('');
+  const w=window.open('','_blank','width=340,height=700');if(!w)return;
+  w.document.write(`<!DOCTYPE html><html><head><title>Cupom ClauQ</title><style>body{font-family:monospace;font-size:11px;width:270px;margin:0 auto;padding:8px;background:#fff}@media print{@page{size:58mm auto;margin:2mm}body{width:52mm}}</style></head><body>${rows}<br/><br/><br/></body></html>`);
+  w.document.close();setTimeout(()=>{try{w.print()}catch{}},400);
+}
 
-// ── Bluetooth ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// BLUETOOTH
+// ═══════════════════════════════════════════════════════════════
 const BTP=[
   {service:'000018f0-0000-1000-8000-00805f9b34fb',char:'00002af1-0000-1000-8000-00805f9b34fb'},
   {service:'e7810a71-73ae-499d-8c15-faa9aef0c3f2',char:'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'},
@@ -86,25 +173,33 @@ const BTP=[
 function usePrinter(){
   const[status,setStatus]=useState('off');
   const[name,setName]=useState(null);
+  const[mode,setMode]=useState(()=>localStorage.getItem('clauq:printerMode')||'window');
   const cr=useRef(null),dr=useRef(null);
   const connect=useCallback(async()=>{
-    if(!navigator.bluetooth)return{ok:false,err:'Use o Chrome no Android para Bluetooth.'};
+    if(!navigator.bluetooth)return{ok:false,err:'Web Bluetooth não disponível. Use o Chrome no Android.',spp:false};
     setStatus('connecting');
     try{
       const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:BTP.map(p=>p.service)});
       dr.current=dev;
-      dev.addEventListener('gattserverdisconnected',()=>{setStatus('off');setName(null);cr.current=null;});
+      dev.addEventListener('gattserverdisconnected',()=>{setStatus('off');setName(null);cr.current=null});
       const srv=await dev.gatt.connect();
       let found=null;
       for(const p of BTP){try{const s=await srv.getPrimaryService(p.service);found=await s.getCharacteristic(p.char);break}catch{}}
       if(!found){try{for(const s of await srv.getPrimaryServices()){for(const c of await s.getCharacteristics()){if(c.properties.write||c.properties.writeWithoutResponse){found=c;break}}if(found)break}}catch{}}
-      if(!found){setStatus('off');return{ok:false,err:'Impressora não reconhecida.'};}
+      if(!found){setStatus('off');return{ok:false,err:'Nenhuma característica encontrada.',spp:false}}
       cr.current=found;setName(dev.name||'Impressora BT');setStatus('on');return{ok:true};
-    }catch(e){setStatus('off');return{ok:false,err:e.name==='NotFoundError'?'Cancelado.':e.message};}
+    }catch(e){
+      setStatus('off');
+      const isSPP=e.message?.toLowerCase().includes('gatt')||e.name==='NetworkError'||e.name==='NotSupportedError';
+      if(e.name==='NotFoundError')return{ok:false,err:'Cancelado.',spp:false};
+      return{ok:false,err:isSPP?'Erro GATT: Impressora usa Bluetooth Clássico (SPP). Troque para Modo Janela nas configurações.':e.message,spp:isSPP};
+    }
   },[]);
-  const disconnect=useCallback(()=>{dr.current?.gatt?.connected&&dr.current.gatt.disconnect();cr.current=null;setStatus('off');setName(null);},[]);
-  const print=useCallback(async(data)=>{
-    if(!cr.current)return{ok:false,err:'Impressora desconectada.'};
+  const disconnect=useCallback(()=>{try{dr.current?.gatt?.connected&&dr.current.gatt.disconnect()}catch{}cr.current=null;setStatus('off');setName(null)},[]);
+  const changeMode=useCallback((m)=>{setMode(m);localStorage.setItem('clauq:printerMode',m)},[]);
+  const print=useCallback(async(data,lines)=>{
+    if(mode==='window'){printViaWindow(lines);return{ok:true}}
+    if(!cr.current)return{ok:false,err:'Impressora BLE não conectada.'};
     try{
       for(let i=0;i<data.length;i+=512){
         const c=data.slice(i,i+512);
@@ -113,20 +208,45 @@ function usePrinter(){
         await new Promise(r=>setTimeout(r,60));
       }
       return{ok:true};
-    }catch(e){return{ok:false,err:e.message};}
-  },[]);
-  return{status,name,connect,disconnect,print};
+    }catch(e){return{ok:false,err:e.message}}
+  },[mode]);
+  return{status,name,mode,changeMode,connect,disconnect,print};
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
 const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const today=()=>new Date().toISOString().split('T')[0];
 const mY=d=>{const dt=new Date(d+'T12:00:00');return`${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`};
+const getTurno=()=>new Date().getHours()>=5&&new Date().getHours()<15?'☀️ Almoço':'🌙 Janta';
+const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
+const fmtTime=iso=>{try{return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}catch{return'--:--'}};
+function dlFile(content,name,type){
+  const blob=new Blob([typeof content==='string'?'\ufeff'+content:content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=Object.assign(document.createElement('a'),{href:url,download:name});
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportCSV(pedidos,mes){
+  const hdr=['#','Data','Cliente','Turno','Itens','Valor R$','Status'];
+  const rows=pedidos.map((p,i)=>[i+1,p.data,p.cliente,p.turno||'',p.itens,Number(p.valor).toFixed(2),p.pago?'Pago':'Pendente']);
+  const csv=[hdr,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  dlFile(csv,`clauq-${mes.replace('/','_')}.csv`,'text/csv;charset=utf-8');
+}
+function getPeriodRange(period){
+  const now=new Date(),end=today();
+  if(period==='hoje')return{start:today(),end};
+  if(period==='semana'){const s=new Date(now);s.setDate(s.getDate()-6);return{start:s.toISOString().split('T')[0],end}}
+  if(period==='mes')return{start:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`,end};
+  return{start:'2000-01-01',end};
+}
 
-// ── Theme ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// TEMA + ÍCONES
+// ═══════════════════════════════════════════════════════════════
 const T={bg:'#faf5ee',card:'#fff',hdr:'#1c0f00',ac:'#d4522a',g:'#3d7a5f',tx:'#1c0f00',sub:'#8a6a50',br:'#e8ddd0',inp:'#fdf8f3'};
-
-// ── SVG Icons ─────────────────────────────────────────────────────────────────
 const PH={
   home:'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
   users:'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
@@ -134,57 +254,66 @@ const PH={
   menu:'M4 6h16M4 12h16M4 18h16',
   chart:'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
   print:'M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z',
-  plus:'M12 4v16m8-8H4',
-  trash:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+  plus:'M12 4v16m8-8H4',trash:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
   edit:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
-  check:'M5 13l4 4L19 7',
-  X:'M6 18L18 6M6 6l12 12',
+  check:'M5 13l4 4L19 7',X:'M6 18L18 6M6 6l12 12',
   star:'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
   wifi:'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.143 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',
   nobt:'M18.364 5.636a9 9 0 010 12.728m-3.536-3.536a5 5 0 000-7.072m-7.072 7.072a5 5 0 010-7.072M5.636 5.636a9 9 0 000 12.728',
   search:'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+  download:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',
+  upload:'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12',
+  clock:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+  shield:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+  settings:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+  alert:'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+  money:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 const Ic=({n,s=22,c='currentColor',sw=2})=>x`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} stroke-width=${sw} stroke-linecap="round" stroke-linejoin="round"><path d=${PH[n]}/></svg>`;
 
-// ── UI Primitives ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// UI COMPONENTS
+// ═══════════════════════════════════════════════════════════════
 function Toast({msg,type,onDone}){
-  useEffect(()=>{const t=setTimeout(onDone,3200);return()=>clearTimeout(t)},[]);
-  const bg={success:'#2d6a4f',error:'#c1440e',info:'#5c4a2a'}[type]||'#5c4a2a';
+  useEffect(()=>{const t=setTimeout(onDone,3500);return()=>clearTimeout(t)},[]);
+  const bg={success:'#2d6a4f',error:'#c1440e',info:'#5c4a2a',warning:'#92400e'}[type]||'#5c4a2a';
   return x`<div class="toast" style=${{background:bg}}><${Ic} n=${type==='success'?'check':'X'} s=${18} c="#fff"/>${msg}</div>`;
 }
-
 function Sheet({title,onClose,children,full}){
   useEffect(()=>{document.body.style.overflow='hidden';return()=>{document.body.style.overflow=''}},[]);
-  return x`
-    <div class="sheet-overlay" onClick=${e=>{if(e.target===e.currentTarget)onClose()}}>
-      <div class=${'sheet'+(full?' full':'')}>
-        <div class="handle"><div class="handle-bar"/></div>
-        <div class="sheet-title">
-          <span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>${title}</span>
-          <button onClick=${onClose} style=${{background:'#f0e8df',border:'none',borderRadius:'10px',width:'34px',height:'34px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="X" s=${18} c=${T.sub}/></button>
-        </div>
-        <div class="sheet-body">${children}</div>
+  return x`<div class="sheet-ov" onClick=${e=>{if(e.target===e.currentTarget)onClose()}}>
+    <div class=${'sheet'+(full?' full':'')}>
+      <div class="handle"><div class="hbar"/></div>
+      <div class="stitle">
+        <span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>${title}</span>
+        <button onClick=${onClose} style=${{background:'#f0e8df',border:'none',borderRadius:'10px',width:'34px',height:'34px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="X" s=${18} c=${T.sub}/></button>
       </div>
-    </div>`;
+      <div class="sheet-body">${children}</div>
+    </div>
+  </div>`;
 }
-
-const Inp=({label,...p})=>x`<div class="inp-wrap">${label&&x`<label class="inp-label">${label}</label>`}${p.as==='textarea'?x`<textarea ...${({...p,as:undefined})} class="inp" style=${{minHeight:'80px',resize:'vertical',...p.style}}/>`:x`<input ...${p} class="inp"/>`}</div>`;
-
+const Inp=({label,...p})=>x`<div style=${{marginBottom:'14px'}}>
+  ${label?x`<label class="inp-lbl">${label}</label>`:null}
+  ${p.as==='textarea'?x`<textarea ...${({...p,as:undefined})} class="inp" style=${{minHeight:'80px',resize:'vertical',...p.style}}/>`:x`<input ...${p} class="inp"/>`}
+</div>`;
 const Btn=({children,onClick,variant='primary',icon,disabled,full,small})=>{
-  const cls=`btn btn-${variant} ${small?'btn-sm':'btn-lg'} ${full?'btn-full':''}`;
-  const c={primary:'#fff',green:'#fff',ghost:T.sub,danger:'#fff'}[variant]||'#fff';
-  return x`<button class=${cls} disabled=${disabled} onClick=${onClick}>${icon&&x`<${Ic} n=${icon} s=${small?15:18} c=${c}/>`}${children}</button>`;
+  const vc={primary:'#fff',green:'#fff',ghost:T.sub,danger:'#fff',blue:'#fff'}[variant]||'#fff';
+  return x`<button class=${`btn btn-${variant} ${small?'btn-sm':'btn-lg'} ${full?'btn-full':''}`} disabled=${disabled} onClick=${onClick}>${icon?x`<${Ic} n=${icon} s=${small?14:17} c=${vc}/>`:null}${children}</button>`;
 };
-
 const Card=({children,onClick,style:sx})=>x`<div class="card" style=${sx} onClick=${onClick}>${children}</div>`;
 const FAB=({onClick,label})=>x`<button class="fab" onClick=${onClick}><${Ic} n="plus" s=${20} c="#fff"/>${label}</button>`;
-const SHead=({title,right})=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'14px'}}><h2 style=${{margin:0,fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>${title}</h2>${right||null}</div>`;
+const SHead=({title,right})=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'14px'}}>
+  <h2 style=${{margin:0,fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>${title}</h2>${right||null}
+</div>`;
 
-// ── HOME ───────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════════════
 function Home({clientes,pedidos,setScreen}){
   const ts=today(),hoje=pedidos.filter(p=>p.data===ts);
   const tH=hoje.reduce((s,p)=>s+Number(p.valor),0);
   const mes=mY(ts),tM=pedidos.filter(p=>mY(p.data)===mes).reduce((s,p)=>s+Number(p.valor),0);
+  const pendentes=pedidos.filter(p=>!p.pago).length;
   const dl=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   return x`<div>
     <div style=${{background:'linear-gradient(135deg,#1c0f00 0%,#3d1a00 100%)',margin:'-16px -16px 20px',padding:'28px 20px 24px',borderRadius:'0 0 24px 24px'}}>
@@ -192,7 +321,7 @@ function Home({clientes,pedidos,setScreen}){
       <h1 style=${{fontFamily:"'DM Serif Display',serif",fontSize:'26px',color:'#fdf0df',margin:0}}>Bom dia! 🍱</h1>
     </div>
     <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'20px'}}>
-      ${[{ic:'users',lb:'Clientes',v:clientes.length,co:'#3d7a5f'},{ic:'cart',lb:'Pedidos hoje',v:hoje.length,co:T.ac},{ic:'star',lb:'Hoje',v:fmt(tH),co:'#a05a20'},{ic:'chart',lb:'Este mês',v:fmt(tM),co:'#5c3d8a'}].map(m=>x`
+      ${[{ic:'users',lb:'Clientes',v:clientes.length,co:'#3d7a5f'},{ic:'cart',lb:'Pedidos hoje',v:hoje.length,co:T.ac},{ic:'star',lb:'Hoje',v:fmt(tH),co:'#a05a20'},{ic:'alert',lb:'Pendentes',v:pendentes,co:'#c2620a'}].map(m=>x`
         <${Card} style=${{padding:'16px'}}>
           <div style=${{width:'36px',height:'36px',borderRadius:'10px',background:m.co+'18',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'10px'}}><${Ic} n=${m.ic} s=${18} c=${m.co}/></div>
           <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:m.v.toString().length>7?'15px':'20px',color:T.tx,fontWeight:700,lineHeight:1.2}}>${m.v}</div>
@@ -213,24 +342,28 @@ function Home({clientes,pedidos,setScreen}){
       <${SHead} title="Hoje" right=${x`<button onClick=${()=>setScreen('pedidos')} style=${{background:'none',border:'none',color:T.ac,fontSize:'13px',fontWeight:700,cursor:'pointer'}}>Ver todos</button>`}/>
       <div style=${{display:'flex',flexDirection:'column',gap:'8px',paddingBottom:'80px'}}>
         ${hoje.slice(-4).reverse().map(p=>x`
-          <${Card}>
-            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-              <div><div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${p.cliente}</div><div style=${{fontSize:'12px',color:T.sub,marginTop:'2px'}}>${p.itens}</div></div>
-              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.ac,fontWeight:700}}>${fmt(p.valor)}</div>
+          <${Card}><div style=${{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style=${{flex:1}}>
+              <div style=${{fontWeight:700,fontSize:'14px',color:T.tx}}>${p.cliente} <span style=${{fontSize:'11px',color:T.sub,fontWeight:400}}>${p.turno||''}</span></div>
+              <div style=${{fontSize:'12px',color:T.sub,marginTop:'2px'}}>${p.itens}</div>
             </div>
-          <//>
+            <div style=${{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'4px'}}>
+              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'16px',color:T.ac,fontWeight:700}}>${fmt(p.valor)}</div>
+              <span style=${{background:p.pago?'#dcfce7':'#fff7ed',color:p.pago?'#166534':'#c2620a',padding:'2px 8px',borderRadius:'6px',fontSize:'10px',fontWeight:700}}>${p.pago?'✓ Pago':'Pendente'}</span>
+            </div>
+          </div><//>
         `)}
       </div>
     `:null}
   </div>`;
 }
 
-// ── CLIENTES ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// CLIENTES
+// ═══════════════════════════════════════════════════════════════
 function Clientes({clientes,setClientes,toast}){
   const[sheet,setSheet]=useState(null),[busca,setBusca]=useState('');
   const[form,setForm]=useState({nome:'',telefone:'',endereco:'',obs:''});
-  const openNew=()=>{setForm({nome:'',telefone:'',endereco:'',obs:''});setSheet('new')};
-  const openEdit=c=>{setForm({nome:c.nome,telefone:c.telefone||'',endereco:c.endereco||'',obs:c.obs||''});setSheet(c)};
   const save=()=>{
     if(!form.nome.trim())return toast('Informe o nome.','error');
     const list=sheet==='new'?[...clientes,{...form,id:Date.now()}]:clientes.map(c=>c.id===sheet.id?{...c,...form}:c);
@@ -239,8 +372,7 @@ function Clientes({clientes,setClientes,toast}){
   };
   const del=id=>{
     if(!confirm('Remover cliente?'))return;
-    const list=clientes.filter(c=>c.id!==id);
-    DB.set('clauq:clientes',list);setClientes(list);toast('Removido.','success');
+    const list=clientes.filter(c=>c.id!==id);DB.set('clauq:clientes',list);setClientes(list);toast('Removido.','success');
   };
   const fil=clientes.filter(c=>c.nome.toLowerCase().includes(busca.toLowerCase())||(c.telefone||'').includes(busca));
   return x`<div>
@@ -251,192 +383,236 @@ function Clientes({clientes,setClientes,toast}){
     </div>
     ${fil.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>${busca?'Nenhum resultado.':'Cadastre o primeiro cliente!'}</div>`:x`
       <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'80px'}}>
-        ${fil.map(c=>x`
-          <${Card}>
-            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-              <div style=${{flex:1}}>
-                <div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${c.nome}</div>
-                ${c.telefone?x`<div style=${{fontSize:'13px',color:T.sub,marginTop:'2px'}}>📞 ${c.telefone}</div>`:null}
-                ${c.endereco?x`<div style=${{fontSize:'13px',color:T.sub}}>📍 ${c.endereco}</div>`:null}
-              </div>
-              <div style=${{display:'flex',gap:'8px'}}>
-                <button onClick=${()=>openEdit(c)} style=${{background:'#f0e8df',border:'none',borderRadius:'10px',width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="edit" s=${16} c=${T.sub}/></button>
-                <button onClick=${()=>del(c.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'10px',width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="trash" s=${16} c="#c1440e"/></button>
-              </div>
+        ${fil.map(c=>x`<${Card}>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div style=${{flex:1}}>
+              <div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${c.nome}</div>
+              ${c.telefone?x`<div style=${{fontSize:'13px',color:T.sub,marginTop:'2px'}}>📞 ${c.telefone}</div>`:null}
+              ${c.endereco?x`<div style=${{fontSize:'13px',color:T.sub}}>📍 ${c.endereco}</div>`:null}
             </div>
-          <//>
-        `)}
+            <div style=${{display:'flex',gap:'8px'}}>
+              <button onClick=${()=>{setForm({nome:c.nome,telefone:c.telefone||'',endereco:c.endereco||'',obs:c.obs||''});setSheet(c)}} style=${{background:'#f0e8df',border:'none',borderRadius:'10px',width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="edit" s=${16} c=${T.sub}/></button>
+              <button onClick=${()=>del(c.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'10px',width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><${Ic} n="trash" s=${16} c="#c1440e"/></button>
+            </div>
+          </div>
+        <//>`) }
       </div>
     `}
-    <${FAB} onClick=${openNew} label="Novo cliente"/>
-    ${sheet?x`
-      <${Sheet} title=${sheet==='new'?'Novo Cliente':'Editar Cliente'} onClose=${()=>setSheet(null)}>
-        <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
-        <${Inp} label="Telefone" type="tel" value=${form.telefone} onInput=${e=>setForm({...form,telefone:e.target.value})}/>
-        <${Inp} label="Endereço" value=${form.endereco} onInput=${e=>setForm({...form,endereco:e.target.value})}/>
-        <${Inp} label="Observações" as="textarea" value=${form.obs} onInput=${e=>setForm({...form,obs:e.target.value})}/>
-        <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
-          <${Btn} variant="ghost" onClick=${()=>setSheet(null)} full=${true}>Cancelar<//>
-          <${Btn} onClick=${save} full=${true}>${sheet==='new'?'Cadastrar':'Salvar'}<//>
-        </div>
-      <//>
-    `:null}
+    <${FAB} onClick=${()=>{setForm({nome:'',telefone:'',endereco:'',obs:''});setSheet('new')}} label="Novo cliente"/>
+    ${sheet?x`<${Sheet} title=${sheet==='new'?'Novo Cliente':'Editar Cliente'} onClose=${()=>setSheet(null)}>
+      <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
+      <${Inp} label="Telefone" type="tel" value=${form.telefone} onInput=${e=>setForm({...form,telefone:e.target.value})}/>
+      <${Inp} label="Endereço" value=${form.endereco} onInput=${e=>setForm({...form,endereco:e.target.value})}/>
+      <${Inp} label="Obs" as="textarea" value=${form.obs} onInput=${e=>setForm({...form,obs:e.target.value})}/>
+      <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
+        <${Btn} variant="ghost" onClick=${()=>setSheet(null)} full=${true}>Cancelar<//>
+        <${Btn} onClick=${save} full=${true}>${sheet==='new'?'Cadastrar':'Salvar'}<//>
+      </div>
+    <//>`:null}
   </div>`;
 }
 
-// ── PEDIDOS ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// PEDIDOS  — clienteId é estado SEPARADO do form (fix do bug)
+// ═══════════════════════════════════════════════════════════════
 function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
-  const[filtroData,setFiltroData]=useState(today()),[sheet,setSheet]=useState(false),[step,setStep]=useState(1);
-  const[form,setForm]=useState({clienteId:'',obs:'',data:today()}),[itens,setItens]=useState([]),[printing,setPrinting]=useState(null);
+  const[filtroData,setFiltroData]=useState(today());
+  const[sheet,setSheet]=useState(false);
+  const[step,setStep]=useState(1);
+  // ★ clienteId separado — evita stale closure no botão Continuar
+  const[clienteId,setClienteId]=useState('');
+  const[form,setForm]=useState({obs:'',data:today(),pago:false,turno:getTurno()});
+  const[itens,setItens]=useState([]);
+  const[printing,setPrinting]=useState(null);
+
   const fil=pedidos.filter(p=>!filtroData||p.data===filtroData);
   const totDia=fil.reduce((s,p)=>s+Number(p.valor),0);
-  const btOn=printer.status==='on',totIt=itens.reduce((s,i)=>s+i.valor*i.qtd,0);
-  const cSel=clientes.find(c=>c.id===Number(form.clienteId));
-  const reset=()=>{setSheet(false);setStep(1);setForm({clienteId:'',obs:'',data:today()});setItens([])};
+  const pagosDia=fil.filter(p=>p.pago).reduce((s,p)=>s+Number(p.valor),0);
+  const btOn=printer.status==='on'||printer.mode==='window';
+  const totIt=itens.reduce((s,i)=>s+i.valor*i.qtd,0);
+  const cSel=clientes.find(c=>String(c.id)===clienteId);
+
+  const reset=()=>{setSheet(false);setStep(1);setClienteId('');setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([])};
   const togItem=item=>setItens(prev=>{const ex=prev.find(i=>i.id===item.id);if(ex)return prev.map(i=>i.id===item.id?{...i,qtd:i.qtd+1}:i);return[...prev,{...item,qtd:1}]});
   const setQtd=(id,q)=>{if(q<1)setItens(p=>p.filter(i=>i.id!==id));else setItens(p=>p.map(i=>i.id===id?{...i,qtd:q}:i))};
-  const save=()=>{
-    if(!form.clienteId)return toast('Selecione um cliente.','error');
+
+  const togglePago=async id=>{
+    const list=pedidos.map(p=>p.id===id?{...p,pago:!p.pago}:p);
+    await DB.set('clauq:pedidos',list);setPedidos(list);
+  };
+  const save=async()=>{
+    if(!clienteId||!cSel)return toast('Selecione um cliente.','error');
     if(itens.length===0)return toast('Adicione pelo menos 1 item.','error');
-    const pedido={id:Date.now(),clienteId:Number(form.clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,obs:form.obs,data:form.data};
-    const list=[...pedidos,pedido];DB.set('clauq:pedidos',list);setPedidos(list);toast('Pedido criado!','success');reset();
+    const pedido={id:Date.now(),clienteId:Number(clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,...form};
+    const list=[...pedidos,pedido];
+    await DB.set('clauq:pedidos',list);setPedidos(list);toast('Pedido criado!','success');reset();
   };
-  const del=id=>{
+  const del=async id=>{
     if(!confirm('Remover pedido?'))return;
-    const list=pedidos.filter(p=>p.id!==id);DB.set('clauq:pedidos',list);setPedidos(list);toast('Removido.','success');
+    const list=pedidos.filter(p=>p.id!==id);
+    await DB.set('clauq:pedidos',list);setPedidos(list);toast('Removido.','success');
   };
-  const prtPedido=async p=>{
-    setPrinting(p.id);
-    const h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    const data=buildReceipt([
-      {type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},
-      {type:'center',text:`${new Date(p.data+'T12:00:00').toLocaleDateString('pt-BR')}  ${h}`},
-      {sep:true},{type:'left',text:`Cliente: ${p.cliente}`,bold:true},{sep:true},
-      ...(p.itensDetalhes||[]).map(it=>({type:'left',text:`${it.qtd}x ${it.nome.slice(0,20).padEnd(20)} ${fmt(it.valor*it.qtd)}`})),
-      {sep:true},{type:'right',text:`TOTAL: ${fmt(p.valor)}`,bold:true},
-      ...(p.obs?[{type:'left',text:`Obs: ${p.obs}`}]:[]),
-      {type:'center',text:'Obrigado!'},{type:'center',text:' '},
-    ]);
-    const res=await printer.print(data);toast(res.ok?'Cupom impresso!':'Erro: '+res.err,res.ok?'success':'error');setPrinting(null);
+
+  const mkLines=(p,todos=false)=>{
+    const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    if(todos){
+      const df=new Date((filtroData||today())+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+      const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'PEDIDOS DO DIA',bold:true},{type:'center',text:df},{sep:true}];
+      fil.forEach((pp,i)=>{lines.push({type:'left',text:`#${i+1} ${pp.cliente} ${pp.turno||''}`,bold:true});lines.push({type:'left',text:pp.itens});if(pp.obs)lines.push({type:'left',text:`Obs: ${pp.obs}`});lines.push({type:'right',text:`${fmt(pp.valor)} ${pp.pago?'[PAGO]':'[PEND]'}`});lines.push({sep:true})});
+      lines.push({type:'right',text:`TOTAL: ${fmt(totDia)}`,bold:true},{type:'right',text:`Recebido: ${fmt(pagosDia)}`},{type:'center',text:' '});
+      return lines;
+    }
+    return[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:`${fmtDate(p.data)}  ${hora}`},{type:'center',text:p.turno||''},{sep:true},{type:'left',text:`Cliente: ${p.cliente}`,bold:true},{sep:true},
+      ...(p.itensDetalhes||[]).map(it=>({type:'left',text:`${it.qtd}x ${it.nome.slice(0,18).padEnd(18)} ${fmt(it.valor*it.qtd)}`})),
+      {sep:true},{type:'right',text:`TOTAL: ${fmt(p.valor)}`,bold:true},{type:'center',text:p.pago?'** PAGO **':'** PENDENTE **',bold:true},
+      ...(p.obs?[{type:'left',text:`Obs: ${p.obs}`}]:[]),{sep:true},{type:'center',text:'Obrigado!'},{type:'center',text:' '}];
   };
-  const prtDia=async()=>{
-    if(fil.length===0)return toast('Nenhum pedido nesta data.','error');
-    setPrinting('dia');
-    const df=new Date((filtroData||today())+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
-    const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'PEDIDOS DO DIA',bold:true},{type:'center',text:df},{sep:true}];
-    fil.forEach((p,i)=>{lines.push({type:'left',text:`#${i+1} ${p.cliente}`,bold:true});lines.push({type:'left',text:p.itens});if(p.obs)lines.push({type:'left',text:`Obs: ${p.obs}`});lines.push({type:'right',text:fmt(p.valor)});lines.push({sep:true})});
-    lines.push({type:'right',text:`TOTAL: ${fmt(totDia)}`,bold:true},{type:'center',text:' '});
-    const res=await printer.print(buildReceipt(lines));toast(res.ok?`${fil.length} pedidos impressos!`:'Erro: '+res.err,res.ok?'success':'error');setPrinting(null);
+  const prt=async(p,todos=false)=>{
+    setPrinting(todos?'dia':p?.id);
+    const lines=mkLines(todos?null:p,todos);
+    const data=buildReceipt(lines);
+    const res=await printer.print(data,lines);
+    toast(res.ok?(todos?`${fil.length} pedidos impressos!`:'Cupom impresso!'):'Erro: '+res.err,res.ok?'success':'error');
+    setPrinting(null);
   };
-  const prtNav=()=>{
-    const df=new Date((filtroData||today())+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    const w=window.open('','_blank');
-    w.document.write(`<html><head><title>Pedidos</title><style>body{font-family:Georgia,serif;padding:20px}table{width:100%;border-collapse:collapse}th{background:#f5e6d3;padding:8px;text-align:left;font-size:12px}td{padding:8px;border-bottom:1px solid #eee;font-size:12px}.tot{font-weight:bold;text-align:right;margin-top:12px;border-top:2px solid #c1440e;padding-top:8px}</style></head><body><h2>🍱 Sistema ClauQ</h2><p>${df}</p><table><thead><tr><th>#</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead><tbody>${fil.map((p,i)=>`<tr><td>${i+1}</td><td>${p.cliente}</td><td>${p.itens}</td><td>R$ ${Number(p.valor).toFixed(2)}</td></tr>`).join('')}</tbody></table><p class="tot">Total: R$ ${totDia.toFixed(2)}</p><script>window.print()<\/script></body></html>`);
-    w.document.close();
-  };
-  const stepView=()=>{
-    if(step===1)return x`<div>
-      <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 1 de 3 — Selecione o cliente</p>
-      <div class="inp-wrap"><label class="inp-label">Data</label><input type="date" value=${form.data} onInput=${e=>setForm({...form,data:e.target.value})} class="inp"/></div>
-      <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
-        ${clientes.length===0?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Cadastre clientes primeiro.</p>`:clientes.map(c=>x`
-          <button onClick=${()=>setForm({...form,clienteId:String(c.id)})} style=${{background:form.clienteId===String(c.id)?T.ac+'18':T.card,border:`2px solid ${form.clienteId===String(c.id)?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px',cursor:'pointer',textAlign:'left'}}>
+
+  // ── Step 1: Selecionar cliente ────────────────────────────────
+  const Step1=()=>x`<div>
+    <p style=${{fontSize:'13px',color:T.sub,marginBottom:'16px'}}>Passo 1 de 3 — Cliente e data</p>
+    <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'14px'}}>
+      <${Inp} label="Data" type="date" value=${form.data} onInput=${e=>setForm(f=>({...f,data:e.target.value}))}/>
+      <div style=${{marginBottom:'14px'}}>
+        <label class="inp-lbl">Turno</label>
+        <div style=${{display:'flex',gap:'8px'}}>
+          ${['☀️ Almoço','🌙 Janta'].map(t=>x`<button key=${t} onClick=${()=>setForm(f=>({...f,turno:t}))} style=${{flex:1,padding:'12px 6px',borderRadius:'12px',border:`2px solid ${form.turno===t?T.ac:T.br}`,background:form.turno===t?T.ac+'12':T.card,fontWeight:600,fontSize:'12px',cursor:'pointer',color:form.turno===t?T.ac:T.sub}}>${t}</button>`)}
+        </div>
+      </div>
+    </div>
+    <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'20px'}}>
+      ${clientes.length===0
+        ?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Cadastre clientes primeiro.</p>`
+        :clientes.map(c=>x`
+          <button key=${c.id} onClick=${()=>setClienteId(String(c.id))} style=${{background:clienteId===String(c.id)?T.ac+'18':T.card,border:`2px solid ${clienteId===String(c.id)?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px',cursor:'pointer',textAlign:'left',width:'100%'}}>
             <div style=${{width:'38px',height:'38px',borderRadius:'20px',background:T.ac+'22',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontFamily:"'DM Serif Display',serif",fontSize:'16px',color:T.ac}}>${c.nome[0]}</div>
-            <div><div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${c.nome}</div>${c.telefone?x`<div style=${{fontSize:'12px',color:T.sub}}>${c.telefone}</div>`:null}</div>
-            ${form.clienteId===String(c.id)?x`<div style=${{marginLeft:'auto'}}><${Ic} n="check" s=${20} c=${T.ac}/></div>`:null}
-          </button>
-        `)}
-      </div>
-      <${Btn} full=${true} onClick=${()=>{if(!form.clienteId)return toast('Selecione um cliente.','error');setStep(2)}}>Continuar →<//>
-    </div>`;
-    if(step===2)return x`<div>
-      <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 2 de 3 — Escolha os itens</p>
-      ${cardapio.length===0?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Configure o cardápio primeiro.</p>`:x`
-        <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
-          ${cardapio.map(item=>{const sel=itens.find(i=>i.id===item.id);return x`
-            <div style=${{background:sel?T.ac+'10':T.card,border:`2px solid ${sel?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
-              <button onClick=${()=>togItem(item)} style=${{flex:1,background:'none',border:'none',cursor:'pointer',textAlign:'left',padding:0}}>
-                <div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${item.nome}</div>
-                <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'15px',color:T.ac}}>${fmt(item.valor)}</div>
-              </button>
-              ${sel?x`
-                <div style=${{display:'flex',alignItems:'center',gap:'8px',flexShrink:0}}>
-                  <button onClick=${()=>setQtd(sel.id,sel.qtd-1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:'#f0e8df',border:'none',cursor:'pointer',fontSize:'20px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>−</button>
-                  <span style=${{fontWeight:700,fontSize:'16px',color:T.ac,minWidth:'22px',textAlign:'center'}}>${sel.qtd}</span>
-                  <button onClick=${()=>setQtd(sel.id,sel.qtd+1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:T.ac,border:'none',cursor:'pointer',fontSize:'20px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'#fff'}}>+</button>
-                </div>
-              `:x`<button onClick=${()=>togItem(item)} style=${{width:'34px',height:'34px',borderRadius:'10px',background:T.ac,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><${Ic} n="plus" s=${18} c="#fff"/></button>`}
+            <div style=${{flex:1}}>
+              <div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${c.nome}</div>
+              ${c.telefone?x`<div style=${{fontSize:'12px',color:T.sub}}>${c.telefone}</div>`:null}
             </div>
-          `})}
-        </div>
-      `}
-      ${itens.length>0?x`
-        <div style=${{background:T.ac+'12',borderRadius:'14px',padding:'12px 16px',marginBottom:'16px'}}>
-          ${itens.map(it=>x`<div style=${{display:'flex',justifyContent:'space-between',fontSize:'13px',color:T.sub,marginBottom:'4px'}}><span>${it.qtd}x ${it.nome}</span><span>${fmt(it.valor*it.qtd)}</span></div>`)}
-          <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'18px',color:T.ac,marginTop:'8px',paddingTop:'8px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
-        </div>
-      `:null}
+            ${clienteId===String(c.id)?x`<${Ic} n="check" s=${22} c=${T.ac}/>`:null}
+          </button>
+        `)
+      }
+    </div>
+    <button class="btn btn-primary btn-lg btn-full" onClick=${()=>{if(!clienteId)return toast('Selecione um cliente.','error');setStep(2)}}>Continuar →</button>
+  </div>`;
+
+  // ── Step 2: Itens ────────────────────────────────────────────
+  const Step2=()=>x`<div>
+    <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 2 de 3 — Itens</p>
+    ${cardapio.length===0?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Configure o cardápio primeiro.</p>`:x`
+      <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
+        ${cardapio.map(item=>{const sel=itens.find(i=>i.id===item.id);return x`
+          <div key=${item.id} style=${{background:sel?T.ac+'10':T.card,border:`2px solid ${sel?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
+            <button onClick=${()=>togItem(item)} style=${{flex:1,background:'none',border:'none',cursor:'pointer',textAlign:'left',padding:0}}>
+              <div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${item.nome}</div>
+              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'15px',color:T.ac}}>${fmt(item.valor)}</div>
+            </button>
+            ${sel?x`<div style=${{display:'flex',alignItems:'center',gap:'8px',flexShrink:0}}>
+              <button onClick=${()=>setQtd(sel.id,sel.qtd-1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:'#f0e8df',border:'none',cursor:'pointer',fontSize:'18px',fontWeight:700}}>−</button>
+              <span style=${{fontWeight:700,fontSize:'16px',color:T.ac,minWidth:'22px',textAlign:'center'}}>${sel.qtd}</span>
+              <button onClick=${()=>setQtd(sel.id,sel.qtd+1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:T.ac,border:'none',cursor:'pointer',fontSize:'18px',fontWeight:700,color:'#fff'}}>+</button>
+            </div>`:x`<button onClick=${()=>togItem(item)} style=${{width:'34px',height:'34px',borderRadius:'10px',background:T.ac,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><${Ic} n="plus" s=${18} c="#fff"/></button>`}
+          </div>
+        `})}
+      </div>
+    `}
+    ${itens.length>0?x`<div style=${{background:T.ac+'12',borderRadius:'14px',padding:'12px 16px',marginBottom:'16px'}}>
+      ${itens.map(it=>x`<div key=${it.id} style=${{display:'flex',justifyContent:'space-between',fontSize:'13px',color:T.sub,marginBottom:'4px'}}><span>${it.qtd}x ${it.nome}</span><span>${fmt(it.valor*it.qtd)}</span></div>`)}
+      <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'18px',color:T.ac,marginTop:'8px',paddingTop:'8px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
+    </div>`:null}
+    <div style=${{display:'flex',gap:'10px'}}>
+      <button class="btn btn-ghost btn-lg btn-full" onClick=${()=>setStep(1)}>← Voltar</button>
+      <button class="btn btn-primary btn-lg btn-full" onClick=${()=>{if(itens.length===0)return toast('Adicione itens.','error');setStep(3)}}>Continuar →</button>
+    </div>
+  </div>`;
+
+  // ── Step 3: Confirmar ────────────────────────────────────────
+  const Step3=()=>x`<div>
+    <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 3 de 3 — Confirmar</p>
+    <${Card} style=${{marginBottom:'12px'}}>
+      <div style=${{display:'flex',justifyContent:'space-between',marginBottom:'4px'}}>
+        <span style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${cSel?.nome}</span>
+        <span style=${{fontSize:'12px',color:T.sub}}>${fmtDate(form.data)}</span>
+      </div>
+      <span style=${{fontSize:'12px',color:T.sub}}>${form.turno}</span>
+      <div style=${{borderTop:`1px solid ${T.br}`,paddingTop:'10px',marginTop:'10px'}}>
+        ${itens.map(it=>x`<div key=${it.id} style=${{display:'flex',justifyContent:'space-between',fontSize:'14px',color:T.tx,marginBottom:'5px'}}><span>${it.qtd}x ${it.nome}</span><span style=${{color:T.ac,fontWeight:700}}>${fmt(it.valor*it.qtd)}</span></div>`)}
+        <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,marginTop:'8px',paddingTop:'8px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
+      </div>
+    <//>
+    <${Inp} label="Observações (opcional)" value=${form.obs} onInput=${e=>setForm(f=>({...f,obs:e.target.value}))}/>
+    <div style=${{marginBottom:'16px'}}>
+      <label class="inp-lbl">Status de pagamento</label>
       <div style=${{display:'flex',gap:'10px'}}>
-        <${Btn} variant="ghost" onClick=${()=>setStep(1)} full=${true}>← Voltar<//>
-        <${Btn} onClick=${()=>{if(itens.length===0)return toast('Adicione itens.','error');setStep(3)}} full=${true}>Continuar →<//>
+        <button onClick=${()=>setForm(f=>({...f,pago:false}))} style=${{flex:1,padding:'12px',borderRadius:'12px',border:`2px solid ${!form.pago?'#c2620a':T.br}`,background:!form.pago?'#fff7ed':T.card,fontWeight:700,fontSize:'14px',cursor:'pointer',color:!form.pago?'#c2620a':T.sub}}>⏳ Pendente</button>
+        <button onClick=${()=>setForm(f=>({...f,pago:true}))} style=${{flex:1,padding:'12px',borderRadius:'12px',border:`2px solid ${form.pago?'#3d7a5f':T.br}`,background:form.pago?'#f0fdf4':T.card,fontWeight:700,fontSize:'14px',cursor:'pointer',color:form.pago?'#3d7a5f':T.sub}}>✅ Pago</button>
       </div>
-    </div>`;
-    return x`<div>
-      <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 3 de 3 — Confirmar</p>
-      <${Card} style=${{marginBottom:'12px'}}><div style=${{fontSize:'12px',color:T.sub,fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px',marginBottom:'6px'}}>Cliente</div><div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${cSel?.nome}</div><//>
-      <${Card} style=${{marginBottom:'12px'}}>
-        <div style=${{fontSize:'12px',color:T.sub,fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px',marginBottom:'8px'}}>Itens</div>
-        ${itens.map(it=>x`<div style=${{display:'flex',justifyContent:'space-between',fontSize:'14px',color:T.tx,marginBottom:'5px'}}><span>${it.qtd}x ${it.nome}</span><span style=${{color:T.ac,fontWeight:700}}>${fmt(it.valor*it.qtd)}</span></div>`)}
-        <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,marginTop:'10px',paddingTop:'10px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
-      <//>
-      <${Inp} label="Observações (opcional)" value=${form.obs} onInput=${e=>setForm({...form,obs:e.target.value})}/>
-      <div style=${{display:'flex',gap:'10px',marginTop:'4px'}}>
-        <${Btn} variant="ghost" onClick=${()=>setStep(2)} full=${true}>← Itens<//>
-        <${Btn} onClick=${save} full=${true}>✓ Criar pedido<//>
-      </div>
-    </div>`;
-  };
+    </div>
+    <div style=${{display:'flex',gap:'10px'}}>
+      <button class="btn btn-ghost btn-lg btn-full" onClick=${()=>setStep(2)}>← Itens</button>
+      <button class="btn btn-primary btn-lg btn-full" onClick=${save}>✓ Criar pedido</button>
+    </div>
+  </div>`;
+
   return x`<div>
-    <${SHead} title="Pedidos" right=${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${prtDia} disabled=${printing==='dia'}>${printing==='dia'?'...':'Imprimir dia'}<//>`:x`<${Btn} small=${true} variant="ghost" icon="print" onClick=${prtNav}>Imprimir<//>` }/>
+    <${SHead} title="Pedidos" right=${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${()=>prt(null,true)} disabled=${printing==='dia'}>${printing==='dia'?'...':'Imprimir dia'}<//>`:x`<${Btn} small=${true} variant="ghost" icon="print" onClick=${()=>printViaWindow(mkLines(null,true))}>Imprimir<//>` }/>
     <div style=${{display:'flex',alignItems:'center',gap:'10px',marginBottom:'16px'}}>
       <input type="date" value=${filtroData} onInput=${e=>setFiltroData(e.target.value)} class="inp" style=${{flex:1}}/>
-      ${filtroData?x`<div style=${{background:T.card,borderRadius:'12px',padding:'10px 14px',border:`1px solid ${T.br}`,flexShrink:0}}><div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'15px',color:T.ac}}>${fmt(totDia)}</div><div style=${{fontSize:'11px',color:T.sub}}>${fil.length} pedido(s)</div></div>`:null}
+      ${filtroData?x`<div style=${{background:T.card,borderRadius:'12px',padding:'10px 14px',border:`1px solid ${T.br}`,flexShrink:0,minWidth:'110px'}}>
+        <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'14px',color:T.ac}}>${fmt(totDia)}</div>
+        <div style=${{fontSize:'10px',color:T.sub}}>${fil.length} pedido(s)</div>
+        <div style=${{fontSize:'10px',color:'#3d7a5f',fontWeight:600}}>✓ ${fmt(pagosDia)}</div>
+      </div>`:null}
     </div>
     ${fil.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum pedido nesta data.</div>`:x`
       <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'90px'}}>
-        ${fil.map((p,i)=>x`
-          <${Card}>
-            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-              <div style=${{flex:1}}>
-                <div style=${{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}}>
-                  <span style=${{background:T.ac,color:'#fff',borderRadius:'6px',padding:'2px 8px',fontSize:'11px',fontWeight:700}}>##${i+1}</span>
-                  <span style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${p.cliente}</span>
-                </div>
-                <div style=${{fontSize:'13px',color:T.sub}}>🍽 ${p.itens}</div>
-                ${p.obs?x`<div style=${{fontSize:'12px',color:T.sub,fontStyle:'italic'}}>📝 ${p.obs}</div>`:null}
+        ${fil.map((p,i)=>x`<${Card} key=${p.id}>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div style=${{flex:1}}>
+              <div style=${{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px',flexWrap:'wrap'}}>
+                <span style=${{background:T.ac,color:'#fff',borderRadius:'6px',padding:'2px 8px',fontSize:'11px',fontWeight:700}}>#${i+1}</span>
+                <span style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${p.cliente}</span>
+                ${p.turno?x`<span style=${{fontSize:'11px',color:T.sub}}>${p.turno}</span>`:null}
               </div>
-              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'18px',color:T.ac,fontWeight:700,flexShrink:0,marginLeft:'8px'}}>${fmt(p.valor)}</div>
+              <div style=${{fontSize:'13px',color:T.sub}}>🍽 ${p.itens}</div>
+              ${p.obs?x`<div style=${{fontSize:'12px',color:T.sub,fontStyle:'italic'}}>📝 ${p.obs}</div>`:null}
             </div>
-            <div style=${{display:'flex',gap:'8px',marginTop:'12px'}}>
-              ${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${()=>prtPedido(p)} disabled=${printing===p.id}>Cupom<//>`:null}
-              <button onClick=${()=>del(p.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
+            <div style=${{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px',flexShrink:0,marginLeft:'8px'}}>
+              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.ac,fontWeight:700}}>${fmt(p.valor)}</div>
+              <button class="pago-btn" onClick=${()=>togglePago(p.id)} style=${{background:p.pago?'#dcfce7':'#fff7ed',color:p.pago?'#166534':'#c2620a'}}>${p.pago?'✓ Pago':'⏳ Pendente'}</button>
             </div>
-          <//>
-        `)}
+          </div>
+          <div style=${{display:'flex',gap:'8px',marginTop:'12px'}}>
+            ${btOn?x`<${Btn} small=${true} variant="green" icon="print" onClick=${()=>prt(p)} disabled=${printing===p.id}>Cupom<//>`:null}
+            <button onClick=${()=>del(p.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 12px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
+          </div>
+        <//>`) }
       </div>
     `}
-    <${FAB} onClick=${()=>{setStep(1);setSheet(true)}} label="Novo pedido"/>
-    ${sheet?x`<${Sheet} title="Novo Pedido" onClose=${reset} full=${true}>${stepView()}<//>`:null}
+    <${FAB} onClick=${()=>{setStep(1);setClienteId('');setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([]);setSheet(true)}} label="Novo pedido"/>
+    ${sheet?x`<${Sheet} title="Novo Pedido" onClose=${reset} full=${true}>
+      ${step===1?x`<${Step1}/>`:step===2?x`<${Step2}/>`:x`<${Step3}/>`}
+    <//>`:null}
   </div>`;
 }
 
-// ── CARDÁPIO ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// CARDÁPIO
+// ═══════════════════════════════════════════════════════════════
 function Cardapio({cardapio,setCardapio,toast}){
   const[sheet,setSheet]=useState(null),[catF,setCatF]=useState('Todos');
   const[form,setForm]=useState({nome:'',descricao:'',valor:'',categoria:'Marmita'});
   const cats=['Marmita','Bebida','Sobremesa','Adicional','Outro'];
-  const openNew=()=>{setForm({nome:'',descricao:'',valor:'',categoria:'Marmita'});setSheet('new')};
-  const openEdit=c=>{setForm({nome:c.nome,descricao:c.descricao||'',valor:String(c.valor),categoria:c.categoria||'Marmita'});setSheet(c)};
   const save=()=>{
     if(!form.nome.trim())return toast('Informe o nome.','error');
     if(!form.valor||isNaN(Number(form.valor)))return toast('Valor inválido.','error');
@@ -452,185 +628,373 @@ function Cardapio({cardapio,setCardapio,toast}){
   return x`<div>
     <${SHead} title=${`Cardápio (${cardapio.length})`}/>
     <div style=${{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px'}}>
-      ${['Todos',...cats].map(cat=>x`<button onClick=${()=>setCatF(cat)} style=${{background:catF===cat?T.ac:'#f0e8df',color:catF===cat?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'8px 16px',fontSize:'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${cat}</button>`)}
+      ${['Todos',...cats].map(cat=>x`<button key=${cat} onClick=${()=>setCatF(cat)} style=${{background:catF===cat?T.ac:'#f0e8df',color:catF===cat?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'8px 16px',fontSize:'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${cat}</button>`)}
     </div>
     ${shown.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum item. Adicione!</div>`:x`
       <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'90px'}}>
-        ${shown.map(item=>x`
-          <${Card}>
-            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-              <div style=${{flex:1}}>
-                <div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${item.nome}</div>
-                ${item.descricao?x`<div style=${{fontSize:'13px',color:T.sub,marginTop:'2px'}}>${item.descricao}</div>`:null}
-                <span class="tag" style=${{marginTop:'6px'}}>${item.categoria}</span>
-              </div>
-              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,fontWeight:700,flexShrink:0,marginLeft:'10px'}}>${fmt(item.valor)}</div>
+        ${shown.map(item=>x`<${Card} key=${item.id}>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div style=${{flex:1}}>
+              <div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${item.nome}</div>
+              ${item.descricao?x`<div style=${{fontSize:'13px',color:T.sub,marginTop:'2px'}}>${item.descricao}</div>`:null}
+              <span style=${{display:'inline-block',background:'#f0e8df',color:T.sub,borderRadius:'6px',padding:'2px 8px',fontSize:'11px',fontWeight:600,marginTop:'6px'}}>${item.categoria}</span>
             </div>
-            <div style=${{display:'flex',gap:'8px',marginTop:'10px'}}>
-              <button onClick=${()=>openEdit(item)} style=${{background:'#f0e8df',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:T.sub}}><${Ic} n="edit" s=${14} c=${T.sub}/>Editar</button>
-              <button onClick=${()=>del(item.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
-            </div>
-          <//>
-        `)}
+            <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,fontWeight:700,marginLeft:'10px'}}>${fmt(item.valor)}</div>
+          </div>
+          <div style=${{display:'flex',gap:'8px',marginTop:'10px'}}>
+            <button onClick=${()=>{setForm({nome:item.nome,descricao:item.descricao||'',valor:String(item.valor),categoria:item.categoria||'Marmita'});setSheet(item)}} style=${{background:'#f0e8df',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:T.sub}}><${Ic} n="edit" s=${14} c=${T.sub}/>Editar</button>
+            <button onClick=${()=>del(item.id)} style=${{background:'#ffe8e8',border:'none',borderRadius:'9px',padding:'8px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',fontWeight:600,color:'#c1440e'}}><${Ic} n="trash" s=${14} c="#c1440e"/>Remover</button>
+          </div>
+        <//>`) }
       </div>
     `}
-    <${FAB} onClick=${openNew} label="Novo item"/>
-    ${sheet?x`
-      <${Sheet} title=${sheet==='new'?'Novo Item':'Editar Item'} onClose=${()=>setSheet(null)}>
-        <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
-        <${Inp} label="Descrição" value=${form.descricao} onInput=${e=>setForm({...form,descricao:e.target.value})}/>
-        <${Inp} label="Valor (R$) *" type="number" min="0" step="0.01" value=${form.valor} onInput=${e=>setForm({...form,valor:e.target.value})}/>
-        <div class="inp-wrap">
-          <label class="inp-label">Categoria</label>
-          <div style=${{display:'flex',flexWrap:'wrap',gap:'8px'}}>
-            ${cats.map(c=>x`<button onClick=${()=>setForm({...form,categoria:c})} style=${{background:form.categoria===c?T.ac:'#f0e8df',color:form.categoria===c?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'9px 18px',fontSize:'14px',fontWeight:600,cursor:'pointer'}}>${c}</button>`)}
-          </div>
+    <${FAB} onClick=${()=>{setForm({nome:'',descricao:'',valor:'',categoria:'Marmita'});setSheet('new')}} label="Novo item"/>
+    ${sheet?x`<${Sheet} title=${sheet==='new'?'Novo Item':'Editar Item'} onClose=${()=>setSheet(null)}>
+      <${Inp} label="Nome *" value=${form.nome} onInput=${e=>setForm({...form,nome:e.target.value})}/>
+      <${Inp} label="Descrição" value=${form.descricao} onInput=${e=>setForm({...form,descricao:e.target.value})}/>
+      <${Inp} label="Valor (R$) *" type="number" min="0" step="0.01" value=${form.valor} onInput=${e=>setForm({...form,valor:e.target.value})}/>
+      <div style=${{marginBottom:'14px'}}>
+        <label class="inp-lbl">Categoria</label>
+        <div style=${{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+          ${cats.map(c=>x`<button key=${c} onClick=${()=>setForm({...form,categoria:c})} style=${{background:form.categoria===c?T.ac:'#f0e8df',color:form.categoria===c?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'9px 18px',fontSize:'14px',fontWeight:600,cursor:'pointer'}}>${c}</button>`)}
         </div>
-        <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
-          <${Btn} variant="ghost" onClick=${()=>setSheet(null)} full=${true}>Cancelar<//>
-          <${Btn} onClick=${save} full=${true}>${sheet==='new'?'Adicionar':'Salvar'}<//>
-        </div>
-      <//>
-    `:null}
+      </div>
+      <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
+        <${Btn} variant="ghost" onClick=${()=>setSheet(null)} full=${true}>Cancelar<//>
+        <${Btn} onClick=${save} full=${true}>${sheet==='new'?'Adicionar':'Salvar'}<//>
+      </div>
+    <//>`:null}
   </div>`;
 }
 
-// ── RELATÓRIO ──────────────────────────────────────────────────────────────────
-function Relatorio({pedidos,printer,toast}){
+// ═══════════════════════════════════════════════════════════════
+// RELATÓRIO
+// ═══════════════════════════════════════════════════════════════
+function Relatorio({pedidos,setPedidos,printer,toast}){
   const ma=mY(today()),ms=[...new Set(pedidos.map(p=>mY(p.data)))].sort().reverse();
-  const[mes,setMes]=useState(ma),[printing,setPrinting]=useState(false);
+  const[mes,setMes]=useState(ma),[tab,setTab]=useState('mensal');
+  const[dvPeriodo,setDvPeriodo]=useState('mes'),[printing,setPrinting]=useState(false);
+
   const lista=pedidos.filter(p=>mY(p.data)===mes),total=lista.reduce((s,p)=>s+Number(p.valor),0);
+  const pagos=lista.filter(p=>p.pago).reduce((s,p)=>s+Number(p.valor),0);
+  const pend=lista.filter(p=>!p.pago).reduce((s,p)=>s+Number(p.valor),0);
   const pD={};lista.forEach(p=>{pD[p.data]=(pD[p.data]||0)+Number(p.valor)});
   const dias=Object.keys(pD).sort(),mx=Math.max(...Object.values(pD),1);
   const pC={};lista.forEach(p=>{pC[p.cliente]=(pC[p.cliente]||0)+Number(p.valor)});
-  const tC=Object.entries(pC).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topCli=Object.entries(pC).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const pI={};lista.forEach(p=>{(p.itens||'').split(', ').forEach(it=>{const m=it.match(/(\d+)x (.+)/);if(m)pI[m[2]]=(pI[m[2]]||0)+Number(m[1])})});
-  const tI=Object.entries(pI).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const btOn=printer.status==='on';
+  const topItm=Object.entries(pI).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  const{start,end}=getPeriodRange(dvPeriodo);
+  const pedsDev=pedidos.filter(p=>!p.pago&&p.data>=start&&p.data<=end);
+  const devedores=Object.values(pedsDev.reduce((acc,p)=>{
+    if(!acc[p.clienteId])acc[p.clienteId]={nome:p.cliente,pedidos:[],total:0};
+    acc[p.clienteId].pedidos.push(p);acc[p.clienteId].total+=Number(p.valor);return acc;
+  },{})).sort((a,b)=>b.total-a.total);
+  const totalDev=devedores.reduce((s,d)=>s+d.total,0);
+
+  const marcarPago=async id=>{const list=pedidos.map(p=>p.id===id?{...p,pago:true}:p);await DB.set('clauq:pedidos',list);setPedidos(list);toast('Marcado como pago!','success')};
+  const marcarTodos=async ids=>{const s=new Set(ids);const list=pedidos.map(p=>s.has(p.id)?{...p,pago:true}:p);await DB.set('clauq:pedidos',list);setPedidos(list);toast('Quitado!','success')};
+  const btOn=printer.status==='on'||printer.mode==='window';
+
   const prtT=async()=>{
     setPrinting(true);
     const[m,a]=mes.split('/'),nm=new Date(`${a}-${m}-01`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-    const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'RELATORIO MENSAL',bold:true},{type:'center',text:nm.toUpperCase()},{sep:true},{type:'left',text:`Pedidos: ${lista.length}`},{type:'left',text:`Faturamento: ${fmt(total)}`,bold:true},{type:'left',text:`Ticket medio: ${fmt(total/(lista.length||1))}`},{sep:true},{type:'left',text:'TOP CLIENTES:',bold:true},...tC.map(([n,v],i)=>({type:'left',text:`${i+1}. ${n.slice(0,15).padEnd(15)} ${fmt(v)}`})),{sep:true},{type:'left',text:'MAIS PEDIDOS:',bold:true},...tI.map(([n,q],i)=>({type:'left',text:`${i+1}. ${n.slice(0,20).padEnd(20)} ${q}x`})),{sep:true},{type:'center',text:'Sistema ClauQ'},{type:'center',text:' '}];
-    const res=await printer.print(buildReceipt(lines));toast(res.ok?'Relatório impresso!':'Erro: '+res.err,res.ok?'success':'error');setPrinting(false);
+    const lines=[{type:'center',text:'SISTEMA CLAUQ',bold:true,double:true},{type:'center',text:'RELATORIO MENSAL',bold:true},{type:'center',text:nm.toUpperCase()},{sep:true},
+      {type:'left',text:`Pedidos: ${lista.length}`},{type:'left',text:`Faturamento: ${fmt(total)}`,bold:true},
+      {type:'left',text:`Recebido:  ${fmt(pagos)}`},{type:'left',text:`Pendente:  ${fmt(pend)}`},
+      {sep:true},{type:'left',text:'TOP CLIENTES:',bold:true},...topCli.map(([n,v],i)=>({type:'left',text:`${i+1}. ${n.slice(0,14).padEnd(14)} ${fmt(v)}`})),
+      {sep:true},{type:'left',text:'MAIS PEDIDOS:',bold:true},...topItm.map(([n,q],i)=>({type:'left',text:`${i+1}. ${n.slice(0,18).padEnd(18)} ${q}x`})),
+      {sep:true},{type:'center',text:'Sistema ClauQ'},{type:'center',text:' '}];
+    const data=buildReceipt(lines);const res=await printer.print(data,lines);
+    toast(res.ok?'Relatório impresso!':'Erro: '+res.err,res.ok?'success':'error');setPrinting(false);
   };
-  const prtN=()=>{
-    const[m,a]=mes.split('/'),nm=new Date(`${a}-${m}-01`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-    const w=window.open('','_blank');
-    w.document.write(`<html><head><title>Relatório</title><style>body{font-family:Georgia,serif;padding:20px}table{width:100%;border-collapse:collapse}th{background:#f5e6d3;padding:8px;text-align:left}td{padding:8px;border-bottom:1px solid #eee}</style></head><body><h2>📊 Sistema ClauQ — ${nm}</h2><p>Pedidos: ${lista.length} | Faturamento: R$ ${total.toFixed(2)}</p><h3>Top Clientes</h3><table><thead><tr><th>Cliente</th><th>Total</th></tr></thead><tbody>${tC.map(([n,v])=>`<tr><td>${n}</td><td>R$ ${v.toFixed(2)}</td></tr>`).join('')}</tbody></table><script>window.print()<\/script></body></html>`);
-    w.document.close();
-  };
+
   return x`<div>
-    <${SHead} title="Relatório" right=${x`<select value=${mes} onChange=${e=>setMes(e.target.value)} class="inp" style=${{width:'auto',padding:'8px 12px'}}>${ms.length===0?x`<option value=${ma}>${ma}</option>`:ms.map(m=>x`<option key=${m}>${m}</option>`)}</select>`}/>
-    ${lista.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum pedido neste mês.</div>`:x`
-      <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'16px'}}>
-        ${[{lb:'Pedidos',v:lista.length,co:'#3d7a5f'},{lb:'Faturamento',v:fmt(total),co:T.ac},{lb:'Ticket médio',v:fmt(total/lista.length),co:'#a05a20'},{lb:'Dias ativos',v:dias.length,co:'#5c3d8a'}].map(m=>x`
-          <${Card} style=${{padding:'14px 16px'}}><div style=${{fontFamily:"'DM Serif Display',serif",fontSize:m.v.toString().length>7?'15px':'19px',color:m.co,fontWeight:700}}>${m.v}</div><div style=${{fontSize:'12px',color:T.sub,marginTop:'3px'}}>${m.lb}</div><//>
-        `)}
-      </div>
-      ${dias.length>0?x`
-        <${Card} style=${{marginBottom:'14px',padding:'16px'}}>
+    <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'14px',gap:'10px',flexWrap:'wrap'}}>
+      <h2 style=${{margin:0,fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.tx}}>Relatório</h2>
+      ${tab==='mensal'?x`<select value=${mes} onChange=${e=>setMes(e.target.value)} class="inp" style=${{width:'auto',padding:'8px 12px'}}>${ms.length===0?x`<option value=${ma}>${ma}</option>`:ms.map(m=>x`<option key=${m}>${m}</option>`)}</select>`:null}
+    </div>
+    <div class="tab">
+      ${[{v:'mensal',l:'📊 Mensal'},{v:'devedores',l:'⚠️ Devedores'}].map(t=>x`
+        <button key=${t.v} class=${`tab-btn${tab===t.v?' active':''}`} onClick=${()=>setTab(t.v)}>${t.l}</button>
+      `)}
+    </div>
+    ${tab==='mensal'?x`<div>
+      ${lista.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum pedido neste mês.</div>`:x`
+        <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'16px'}}>
+          ${[{lb:'Pedidos',v:lista.length,co:'#3d7a5f'},{lb:'Faturamento',v:fmt(total),co:T.ac},{lb:'✓ Recebido',v:fmt(pagos),co:'#3d7a5f'},{lb:'⏳ Pendente',v:fmt(pend),co:'#c2620a'}].map(m=>x`
+            <${Card} style=${{padding:'14px 16px'}}><div style=${{fontFamily:"'DM Serif Display',serif",fontSize:m.v.toString().length>7?'13px':'18px',color:m.co,fontWeight:700}}>${m.v}</div><div style=${{fontSize:'12px',color:T.sub,marginTop:'3px'}}>${m.lb}</div><//>
+          `)}
+        </div>
+        ${dias.length>0?x`<${Card} style=${{marginBottom:'14px',padding:'16px'}}>
           <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'12px'}}>Faturamento por dia</div>
           <div style=${{display:'flex',alignItems:'flex-end',gap:'4px',height:'70px',overflowX:'auto'}}>
             ${dias.map(dia=>{const v=pD[dia],h=Math.max(6,(v/mx)*60);return x`
-              <div style=${{flex:1,minWidth:'20px',display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}}>
-                <div style=${{width:'100%',height:`${h}px`,background:T.ac,borderRadius:'4px 4px 0 0'}} title=${`${dia}: ${fmt(v)}`}/>
+              <div key=${dia} style=${{flex:1,minWidth:'20px',display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}}>
+                <div style=${{width:'100%',height:`${h}px`,background:T.ac,borderRadius:'4px 4px 0 0'}}/>
                 <div style=${{fontSize:'8px',color:T.sub}}>${dia.slice(8)}</div>
               </div>
             `})}
           </div>
-        <//>
-      `:null}
-      ${tC.length>0?x`
-        <${Card} style=${{marginBottom:'10px'}}>
+        <//>`:null}
+        ${topCli.length>0?x`<${Card} style=${{marginBottom:'10px'}}>
           <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'10px'}}>🏆 Top Clientes</div>
-          ${tC.map(([nome,val],i)=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:i<tC.length-1?`1px solid ${T.br}`:'none'}}><span style=${{fontSize:'14px',color:T.tx}}>${['🥇','🥈','🥉'][i]||`${i+1}.`} ${nome}</span><span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'14px',color:T.ac}}>${fmt(val)}</span></div>`)}
-        <//>
-      `:null}
-      ${tI.length>0?x`
-        <${Card} style=${{marginBottom:'90px'}}>
+          ${topCli.map(([nome,val],i)=>x`<div key=${nome} style=${{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:i<topCli.length-1?`1px solid ${T.br}`:'none'}}><span style=${{fontSize:'14px',color:T.tx}}>${['🥇','🥈','🥉'][i]||`${i+1}.`} ${nome}</span><span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'14px',color:T.ac}}>${fmt(val)}</span></div>`)}
+        <//>`:null}
+        ${topItm.length>0?x`<${Card} style=${{marginBottom:'10px'}}>
           <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'10px'}}>🍽 Mais pedidos</div>
-          ${tI.map(([nome,qtd],i)=>x`<div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:i<tI.length-1?`1px solid ${T.br}`:'none'}}><span style=${{fontSize:'14px',color:T.tx}}>${i+1}. ${nome}</span><span style=${{fontSize:'13px',color:T.ac,fontWeight:700}}>${qtd}x</span></div>`)}
-        <//>
-      `:null}
-      <div style=${{position:'fixed',bottom:'72px',left:0,right:0,maxWidth:'480px',margin:'0 auto',padding:'0 16px'}}>
-        ${btOn?x`<${Btn} full=${true} variant="green" icon="print" onClick=${prtT} disabled=${printing}>${printing?'Imprimindo...':'🖨 Imprimir na térmica'}<//>`:x`<${Btn} full=${true} variant="ghost" icon="print" onClick=${prtN}>Imprimir relatório<//>` }
+          ${topItm.map(([nome,qtd],i)=>x`<div key=${nome} style=${{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:i<topItm.length-1?`1px solid ${T.br}`:'none'}}><span style=${{fontSize:'14px',color:T.tx}}>${i+1}. ${nome}</span><span style=${{fontSize:'13px',color:T.ac,fontWeight:700}}>${qtd}x</span></div>`)}
+        <//>`:null}
+        <div style=${{display:'flex',gap:'10px',marginBottom:'80px',marginTop:'4px'}}>
+          <${Btn} full=${true} variant="ghost" icon="download" onClick=${()=>exportCSV(lista,mes)}>Exportar CSV<//>
+          ${btOn?x`<${Btn} full=${true} variant="green" icon="print" onClick=${prtT} disabled=${printing}>${printing?'...':'🖨 Imprimir'}<//>`:null}
+        </div>
+      `}
+    </div>`:null}
+    ${tab==='devedores'?x`<div>
+      <div style=${{display:'flex',gap:'8px',marginBottom:'16px',overflowX:'auto',paddingBottom:'4px'}}>
+        ${[{v:'hoje',l:'Hoje'},{v:'semana',l:'Semana'},{v:'mes',l:'Este mês'},{v:'geral',l:'Geral'}].map(p=>x`
+          <button key=${p.v} onClick=${()=>setDvPeriodo(p.v)} style=${{background:dvPeriodo===p.v?T.ac:'#f0e8df',color:dvPeriodo===p.v?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'8px 18px',fontSize:'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${p.l}</button>
+        `)}
       </div>
-    `}
+      ${devedores.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>✅ Nenhum devedor neste período!</div>`:x`
+        <${Card} style=${{marginBottom:'14px',background:'#fff7ed',border:'1px solid #fed7aa'}}>
+          <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div><div style=${{fontWeight:700,fontSize:'14px',color:'#c2620a'}}>${devedores.length} cliente(s) com pendências</div><div style=${{fontSize:'12px',color:'#9a3412'}}>${pedsDev.length} pedido(s) não pagos</div></div>
+            <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:'#c2620a',fontWeight:700}}>${fmt(totalDev)}</div>
+          </div>
+        <//>
+        <div style=${{display:'flex',flexDirection:'column',gap:'12px',paddingBottom:'80px'}}>
+          ${devedores.map(d=>x`<${Card} key=${d.nome}>
+            <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
+              <div><div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>${d.nome}</div><div style=${{fontSize:'12px',color:T.sub}}>${d.pedidos.length} pedido(s) em aberto</div></div>
+              <div style=${{textAlign:'right'}}>
+                <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'18px',color:'#c2620a',fontWeight:700}}>${fmt(d.total)}</div>
+                <button onClick=${()=>marcarTodos(d.pedidos.map(p=>p.id))} style=${{background:'#dcfce7',color:'#166534',border:'none',borderRadius:'8px',padding:'4px 10px',fontSize:'11px',fontWeight:700,cursor:'pointer',marginTop:'4px'}}>✓ Quitar tudo</button>
+              </div>
+            </div>
+            <div style=${{borderTop:`1px solid ${T.br}`,paddingTop:'10px'}}>
+              ${d.pedidos.map(p=>x`<div key=${p.id} style=${{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'8px 0',borderBottom:`1px dashed ${T.br}`}}>
+                <div style=${{flex:1}}>
+                  <div style=${{fontSize:'13px',color:T.tx,fontWeight:600}}>${fmtDate(p.data)} ${p.turno||''}</div>
+                  <div style=${{fontSize:'12px',color:T.sub}}>${p.itens}</div>
+                  ${p.obs?x`<div style=${{fontSize:'11px',color:T.sub,fontStyle:'italic'}}>${p.obs}</div>`:null}
+                </div>
+                <div style=${{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'4px',marginLeft:'10px'}}>
+                  <span style=${{fontWeight:700,fontSize:'14px',color:'#c2620a'}}>${fmt(p.valor)}</span>
+                  <button onClick=${()=>marcarPago(p.id)} style=${{background:'#dcfce7',color:'#166534',border:'none',borderRadius:'7px',padding:'3px 9px',fontSize:'11px',fontWeight:700,cursor:'pointer'}}>✓ Pago</button>
+                </div>
+              </div>`)}
+            </div>
+          <//>`) }
+        </div>
+      `}
+    </div>`:null}
   </div>`;
 }
 
-// ── BLUETOOTH ──────────────────────────────────────────────────────────────────
-function BTSetup({printer}){
-  const{status,name,connect,disconnect}=printer,[loading,setLoading]=useState(false),[err,setErr]=useState(null);
+// ═══════════════════════════════════════════════════════════════
+// CONFIGURAÇÕES — Impressora + Backup automático
+// ═══════════════════════════════════════════════════════════════
+function Configuracoes({printer,toast,clientes,pedidos,cardapio,setCli,setPed,setCa,backupInfo,setBackupInterval}){
+  const{status,name,mode,changeMode,connect,disconnect}=printer;
+  const[loading,setLoading]=useState(false),[err,setErr]=useState(null),[sppWarn,setSppWarn]=useState(false);
+  const fileRef=useRef(null);
   const co={on:'#3d7a5f',connecting:'#a05a20',off:'#8a6a50',error:'#c1440e'}[status];
-  const lb={on:`Conectado: ${name}`,connecting:'Conectando...',off:'Desconectado',error:'Erro de conexão'}[status];
-  const hConn=async()=>{setLoading(true);setErr(null);const res=await connect();if(!res.ok)setErr(res.err);setLoading(false)};
-  return x`<div style=${{paddingBottom:'90px'}}>
-    <${Card} style=${{marginBottom:'20px'}}>
-      <div style=${{display:'flex',alignItems:'center',gap:'14px'}}>
-        <div style=${{width:'48px',height:'48px',borderRadius:'14px',background:co+'18',display:'flex',alignItems:'center',justifyContent:'center'}}><${Ic} n=${status==='on'?'wifi':'nobt'} s=${24} c=${co}/></div>
-        <div><div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>Impressora Térmica</div><div style=${{fontSize:'13px',color:co,marginTop:'2px'}}>${lb}</div></div>
-      </div>
-    <//>
-    ${err?x`<div style=${{background:'#fff0f0',border:'1px solid #fca5a5',borderRadius:'12px',padding:'12px 16px',marginBottom:'16px',fontSize:'13px',color:'#c1440e'}}>⚠️ ${err}</div>`:null}
-    <${Card} style=${{marginBottom:'20px'}}>
-      <div style=${{fontWeight:700,fontSize:'15px',color:T.tx,marginBottom:'12px'}}>Como conectar</div>
-      ${[{n:'1',t:'Ligue a impressora térmica.'},{n:'2',t:'Pareie no Bluetooth do celular (Configurações → Bluetooth).'},{n:'3',t:'Toque em "Conectar" abaixo e selecione na lista.'},{n:'4',t:'Pronto! Use o botão 🖨 nos pedidos.'}].map(s=>x`
-        <div style=${{display:'flex',gap:'12px',marginBottom:'12px'}}>
-          <div style=${{width:'28px',height:'28px',borderRadius:'14px',background:T.ac,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:'13px',flexShrink:0}}>${s.n}</div>
-          <div style=${{fontSize:'14px',color:T.tx,paddingTop:'4px'}}>${s.t}</div>
-        </div>
+  const lb={on:`Conectado: ${name}`,connecting:'Conectando...',off:'Desconectado',error:'Erro'}[status];
+  const INTERVALS=[{v:1,l:'1 minuto'},{v:5,l:'5 minutos'},{v:10,l:'10 minutos'},{v:30,l:'30 minutos'},{v:0,l:'Manual'}];
+
+  const hConn=async()=>{
+    setLoading(true);setErr(null);setSppWarn(false);
+    const res=await connect();
+    if(!res.ok){setErr(res.err);if(res.spp)setSppWarn(true)}
+    setLoading(false);
+  };
+  const doImport=async e=>{
+    const file=e.target.files[0];if(!file)return;
+    try{await DB.importJSON(file,setCli,setPed,setCa);toast('Dados importados!','success')}
+    catch{toast('Erro ao importar.','error')}
+    e.target.value='';
+  };
+  const doForceBackup=async()=>{
+    const ok=await OPFS.write({clientes,pedidos,cardapio});
+    toast(ok?'Backup salvo no dispositivo!':'Erro no backup (OPFS não suportado).',ok?'success':'error');
+  };
+
+  return x`<div style=${{paddingBottom:'20px'}}>
+    <${SHead} title="Configurações"/>
+
+    <h3 style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.tx,marginBottom:'12px'}}>🖨 Impressora</h3>
+    <div class="tab" style=${{marginBottom:'16px'}}>
+      ${[{v:'ble',l:'📶 Bluetooth BLE'},{v:'window',l:'🖥 Modo Janela'}].map(m=>x`
+        <button key=${m.v} class=${`tab-btn${mode===m.v?' active':''}`} onClick=${()=>{changeMode(m.v);setErr(null);setSppWarn(false)}}>${m.l}</button>
       `)}
-      <div style=${{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:'10px',padding:'10px 14px',marginTop:'4px',fontSize:'12px',color:'#92400e'}}>⚠️ Web Bluetooth funciona no <strong>Chrome para Android</strong>. No iPhone, use a impressão normal.</div>
+    </div>
+    ${mode==='window'?x`<div class="info-box" style=${{marginBottom:'16px'}}>
+      <strong>Modo Janela</strong> — Ideal para impressoras SPP (Bluetooth Clássico com PIN).<br/>
+      No Android: toque em <strong>Mais opções → Selecionar impressora</strong> na janela de impressão.
+    </div>`:x`<div>
+      <${Card} style=${{marginBottom:'14px'}}>
+        <div style=${{display:'flex',alignItems:'center',gap:'14px'}}>
+          <div style=${{width:'48px',height:'48px',borderRadius:'14px',background:co+'18',display:'flex',alignItems:'center',justifyContent:'center'}}><${Ic} n=${status==='on'?'wifi':'nobt'} s=${24} c=${co}/></div>
+          <div><div style=${{fontWeight:700,fontSize:'16px',color:T.tx}}>Bluetooth BLE</div><div style=${{fontSize:'13px',color:co,marginTop:'2px'}}>${lb}</div></div>
+        </div>
+      <//>
+      ${err?x`<div class="err-box" style=${{marginBottom:'12px'}}>${err}</div>`:null}
+      ${sppWarn?x`<div class="info-box" style=${{marginBottom:'12px'}}>Troque para <strong>Modo Janela</strong> acima para usar sua impressora SPP.</div>`:null}
+      <div style=${{marginBottom:'20px'}}>${status==='on'?x`<${Btn} full=${true} variant="danger" icon="nobt" onClick=${disconnect}>Desconectar<//>`:x`<${Btn} full=${true} variant="green" icon="wifi" onClick=${hConn} disabled=${loading||status==='connecting'}>${loading||status==='connecting'?'Procurando...':'Conectar BLE'}<//>` }</div>
+    </div>`}
+
+    <div class="sep"/>
+    <h3 style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.tx,marginBottom:'4px'}}>💾 Backup Automático</h3>
+    <p style=${{fontSize:'12px',color:T.sub,marginBottom:'14px'}}>Os dados são salvos automaticamente no dispositivo (OPFS), independente do cache do navegador.</p>
+
+    <${Card} style=${{marginBottom:'16px'}}>
+      <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
+        <div style=${{display:'flex',alignItems:'center',gap:'8px'}}>
+          <${Ic} n="shield" s=${18} c=${OPFS.ok?'#3d7a5f':'#c2620a'}/>
+          <span style=${{fontWeight:600,fontSize:'14px',color:T.tx}}>OPFS ${OPFS.ok?'✅ Suportado':'⚠️ Indisponível'}</span>
+        </div>
+        ${backupInfo.saving?x`<div class="saving-dot" style=${{background:'#3d7a5f'}}/>`:null}
+      </div>
+      <div style=${{fontSize:'12px',color:T.sub,marginBottom:'8px'}}>Último backup: <strong>${backupInfo.lastSave||'Nunca'}</strong></div>
+      <div style=${{fontSize:'12px',color:T.sub}}>Próximo em: <strong>${backupInfo.nextIn||'--'}</strong></div>
     <//>
-    <div style=${{position:'fixed',bottom:'72px',left:0,right:0,maxWidth:'480px',margin:'0 auto',padding:'0 16px'}}>
-      ${status==='on'?x`<${Btn} full=${true} variant="danger" icon="nobt" onClick=${disconnect}>Desconectar impressora<//>`:x`<${Btn} full=${true} variant="green" icon="wifi" onClick=${hConn} disabled=${loading||status==='connecting'}>${loading||status==='connecting'?'Procurando...':'Conectar impressora'}<//>` }
+
+    <div style=${{marginBottom:'16px'}}>
+      <label class="inp-lbl">Intervalo de backup automático</label>
+      <div style=${{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+        ${INTERVALS.map(iv=>x`
+          <button key=${iv.v} onClick=${()=>setBackupInterval(iv.v)} style=${{background:backupInfo.interval===iv.v?T.ac:'#f0e8df',color:backupInfo.interval===iv.v?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'9px 16px',fontSize:'13px',fontWeight:600,cursor:'pointer'}}>${iv.l}</button>
+        `)}
+      </div>
+    </div>
+
+    <div style=${{display:'flex',gap:'10px',marginBottom:'10px'}}>
+      <${Btn} full=${true} variant="green" icon="shield" onClick=${doForceBackup}>Salvar backup agora<//>
+    </div>
+
+    <div class="sep"/>
+    <h3 style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.tx,marginBottom:'12px'}}>📤 Exportar / Importar</h3>
+    <p style=${{fontSize:'12px',color:T.sub,marginBottom:'14px'}}>Para transferir dados entre dispositivos ou como cópia extra de segurança.</p>
+    <div style=${{display:'flex',flexDirection:'column',gap:'10px',paddingBottom:'20px'}}>
+      <${Btn} full=${true} variant="ghost" icon="download" onClick=${()=>DB.exportJSON(clientes,pedidos,cardapio)}>⬇️ Exportar JSON<//>
+      <button onClick=${()=>fileRef.current?.click()} class="btn btn-ghost btn-lg btn-full"><${Ic} n="upload" s=${17} c=${T.sub}/>⬆️ Importar JSON</button>
+      <input ref=${fileRef} type="file" accept=".json" style=${{display:'none'}} onChange=${doImport}/>
     </div>
   </div>`;
 }
 
-// ── APP ────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// APP ROOT
+// ═══════════════════════════════════════════════════════════════
 function App(){
   const[screen,setScreen]=useState('home');
   const[clientes,setClientes]=useState([]);
   const[pedidos,setPedidos]=useState([]);
   const[cardapio,setCardapio]=useState([]);
   const[toast,setToast]=useState(null);
+  const[loading,setLoading]=useState(true);
+  const[backupInfo,setBackupInfo]=useState({lastSave:null,interval:5,saving:false,nextIn:null});
+  const timerRef=useRef(null);
   const printer=usePrinter();
   const showToast=(msg,type='success')=>setToast({msg,type,id:Date.now()});
+
+  // ── Carregamento inicial: OPFS → IndexedDB → localStorage ───
   useEffect(()=>{
-    setClientes(DB.get('clauq:clientes')||[]);
-    setPedidos(DB.get('clauq:pedidos')||[]);
-    setCardapio(DB.get('clauq:cardapio')||[]);
+    (async()=>{
+      let data=await OPFS.read();
+      if(data?.clientes){
+        setClientes(data.clientes||[]);setPedidos(data.pedidos||[]);setCardapio(data.cardapio||[]);
+        if(data.savedAt)setBackupInfo(b=>({...b,lastSave:fmtTime(data.savedAt)}));
+      }else{
+        const[c,p,ca]=await Promise.all([DB.get('clauq:clientes'),DB.get('clauq:pedidos'),DB.get('clauq:cardapio')]);
+        setClientes(c||[]);setPedidos(p||[]);setCardapio(ca||[]);
+        // Criar primeiro backup OPFS imediatamente
+        if(OPFS.ok)OPFS.write({clientes:c||[],pedidos:p||[],cardapio:ca||[]}).then(ok=>{if(ok)setBackupInfo(b=>({...b,lastSave:fmtTime(new Date().toISOString())}))});
+      }
+      const savedInterval=parseInt(localStorage.getItem('clauq:backupInterval')||'5');
+      setBackupInfo(b=>({...b,interval:savedInterval}));
+      setLoading(false);
+    })();
   },[]);
+
+  // ── Backup automático periódico ──────────────────────────────
+  const setBackupInterval=useCallback(mins=>{
+    setBackupInfo(b=>({...b,interval:mins}));
+    localStorage.setItem('clauq:backupInterval',String(mins));
+  },[]);
+
+  useEffect(()=>{
+    if(timerRef.current)clearInterval(timerRef.current);
+    if(loading||backupInfo.interval===0)return;
+    const mins=backupInfo.interval;
+    let nextTs=Date.now()+mins*60000;
+    const tick=async()=>{
+      setBackupInfo(b=>({...b,saving:true}));
+      const data={clientes,pedidos,cardapio};
+      // Salva em IndexedDB (sempre)
+      await Promise.all([DB.set('clauq:clientes',clientes),DB.set('clauq:pedidos',pedidos),DB.set('clauq:cardapio',cardapio)]);
+      // Salva em OPFS
+      const ok=await OPFS.write(data);
+      const now=fmtTime(new Date().toISOString());
+      nextTs=Date.now()+mins*60000;
+      setBackupInfo(b=>({...b,saving:false,lastSave:ok?now:b.lastSave}));
+    };
+    timerRef.current=setInterval(tick,mins*60000);
+    // Atualiza contador de próximo backup
+    const counter=setInterval(()=>{
+      const remaining=Math.max(0,Math.ceil((nextTs-Date.now())/60000));
+      setBackupInfo(b=>({...b,nextIn:remaining<=1?'<1 min':`${remaining} min`}));
+    },30000);
+    setBackupInfo(b=>({...b,nextIn:`${mins} min`}));
+    return()=>{clearInterval(timerRef.current);clearInterval(counter)};
+  },[backupInfo.interval,loading,clientes,pedidos,cardapio]);
+
+  // ── Salvar no IndexedDB a cada mudança de dados ──────────────
+  useEffect(()=>{if(!loading){DB.set('clauq:clientes',clientes)}},[clientes,loading]);
+  useEffect(()=>{if(!loading){DB.set('clauq:pedidos',pedidos)}},[pedidos,loading]);
+  useEffect(()=>{if(!loading){DB.set('clauq:cardapio',cardapio)}},[cardapio,loading]);
+
   const NAV=[{id:'home',lb:'Início',ic:'home'},{id:'clientes',lb:'Clientes',ic:'users'},{id:'pedidos',lb:'Pedidos',ic:'cart'},{id:'cardapio',lb:'Cardápio',ic:'menu'},{id:'relatorio',lb:'Relatório',ic:'chart'}];
-  const btOn=printer.status==='on';
+  const btOn=printer.status==='on',isWin=printer.mode==='window';
+
+  if(loading)return x`<div style=${{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:T.hdr,gap:'12px'}}>
+    <span style=${{fontSize:'52px'}}>🍱</span>
+    <span style=${{fontFamily:"'DM Serif Display',serif",fontSize:'24px',color:'#fdf0df'}}>Sistema ClauQ</span>
+    <span style=${{fontSize:'13px',color:'#c8a070'}}>Carregando...</span>
+  </div>`;
+
   return x`<div style=${{display:'flex',flexDirection:'column',height:'100%'}}>
-    <header style=${{background:T.hdr,padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
+    <header style=${{background:T.hdr,padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
       <div style=${{display:'flex',alignItems:'center',gap:'10px'}}>
-        <span style=${{fontSize:'22px'}}>🍱</span>
+        <span style=${{fontSize:'20px'}}>🍱</span>
         <div>
-          <div style=${{fontFamily:"'DM Serif Display',serif",color:'#fdf0df',fontSize:'18px',lineHeight:1.1}}>Sistema ClauQ</div>
-          ${screen!=='home'?x`<div style=${{fontSize:'11px',color:'#c8a070'}}>${NAV.find(n=>n.id===screen)?.lb||'Bluetooth'}</div>`:null}
+          <div style=${{fontFamily:"'DM Serif Display',serif",color:'#fdf0df',fontSize:'17px',lineHeight:1.1}}>Sistema ClauQ</div>
+          ${screen!=='home'?x`<div style=${{fontSize:'10px',color:'#c8a070'}}>${NAV.find(n=>n.id===screen)?.lb||'Configurações'}</div>`:null}
         </div>
       </div>
-      <button onClick=${()=>setScreen('bluetooth')} style=${{background:btOn?'#0f3321':'rgba(255,255,255,.1)',border:'none',borderRadius:'20px',padding:'7px 13px',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer'}}>
-        <${Ic} n=${btOn?'wifi':'nobt'} s=${15} c=${btOn?'#4ade80':'#c8a070'}/>
-        <span style=${{fontSize:'11px',color:btOn?'#4ade80':'#c8a070'}}>${btOn?printer.name?.split(' ')[0]||'BT':'BT'}</span>
-      </button>
+      <div style=${{display:'flex',alignItems:'center',gap:'8px'}}>
+        ${backupInfo.saving?x`<div style=${{fontSize:'10px',color:'#4ade80',display:'flex',alignItems:'center',gap:'4px'}}><div class="saving-dot" style=${{background:'#4ade80',width:'6px',height:'6px'}}/>Salvando</div>`:backupInfo.lastSave?x`<div style=${{fontSize:'10px',color:'#c8a070'}}>💾 ${backupInfo.lastSave}</div>`:null}
+        <button onClick=${()=>setScreen(screen==='config'?'home':'config')} style=${{background:btOn?'#0f3321':isWin?'#0f2240':'rgba(255,255,255,.1)',border:'none',borderRadius:'20px',padding:'6px 12px',display:'flex',alignItems:'center',gap:'5px',cursor:'pointer'}}>
+          ${btOn?x`<${Ic} n="wifi" s=${14} c="#4ade80"/>`:isWin?x`<${Ic} n="print" s=${14} c="#60a5fa"/>`:x`<${Ic} n="settings" s=${14} c="#c8a070"/>`}
+          <span style=${{fontSize:'10px',color:btOn?'#4ade80':isWin?'#60a5fa':'#c8a070'}}>${btOn?printer.name?.split(' ')[0]||'BT':isWin?'Janela':'Config'}</span>
+        </button>
+      </div>
     </header>
     <main style=${{flex:1,padding:'16px 16px 0',overflowY:'auto'}}>
       ${screen==='home'?x`<${Home} clientes=${clientes} pedidos=${pedidos} setScreen=${setScreen}/>`:null}
       ${screen==='clientes'?x`<${Clientes} clientes=${clientes} setClientes=${setClientes} toast=${showToast}/>`:null}
       ${screen==='pedidos'?x`<${Pedidos} clientes=${clientes} pedidos=${pedidos} setPedidos=${setPedidos} cardapio=${cardapio} toast=${showToast} printer=${printer}/>`:null}
       ${screen==='cardapio'?x`<${Cardapio} cardapio=${cardapio} setCardapio=${setCardapio} toast=${showToast}/>`:null}
-      ${screen==='relatorio'?x`<${Relatorio} pedidos=${pedidos} printer=${printer} toast=${showToast}/>`:null}
-      ${screen==='bluetooth'?x`<${BTSetup} printer=${printer}/>`:null}
+      ${screen==='relatorio'?x`<${Relatorio} pedidos=${pedidos} setPedidos=${setPedidos} printer=${printer} toast=${showToast}/>`:null}
+      ${screen==='config'?x`<${Configuracoes} printer=${printer} toast=${showToast} clientes=${clientes} pedidos=${pedidos} cardapio=${cardapio} setCli=${setClientes} setPed=${setPedidos} setCa=${setCardapio} backupInfo=${backupInfo} setBackupInterval=${setBackupInterval}/>`:null}
     </main>
     <nav class="nav">
       ${NAV.map(n=>{const active=screen===n.id;return x`
-        <button class="nav-btn" onClick=${()=>setScreen(n.id)}>
-          <div class="nav-icon" style=${{background:active?T.ac+'18':'transparent'}}><${Ic} n=${n.ic} s=${20} c=${active?T.ac:T.sub} sw=${active?2.5:2}/></div>
+        <button key=${n.id} class="nav-btn" onClick=${()=>setScreen(n.id)}>
+          <div class="nav-ic" style=${{background:active?T.ac+'18':'transparent'}}><${Ic} n=${n.ic} s=${20} c=${active?T.ac:T.sub} sw=${active?2.5:2}/></div>
           <span style=${{fontSize:'10px',fontWeight:active?700:500,color:active?T.ac:T.sub}}>${n.lb}</span>
         </button>
       `})}
