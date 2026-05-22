@@ -375,7 +375,7 @@ function Clientes({clientes,setClientes,toast}){
     if(!confirm('Remover cliente?'))return;
     const list=clientes.filter(c=>c.id!==id);DB.set('clauq:clientes',list);setClientes(list);toast('Removido.','success');
   };
-  const fil=clientes.filter(c=>c.nome.toLowerCase().includes(busca.toLowerCase())||(c.telefone||'').includes(busca));
+  const fil=clientes.filter(c=>c.nome.toLowerCase().includes(busca.toLowerCase())||(c.telefone||'').includes(busca)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   return x`<div>
     <${SHead} title=${`Clientes (${clientes.length})`}/>
     <div style=${{position:'relative',marginBottom:'16px'}}>
@@ -424,6 +424,8 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   // ★ clienteId separado — evita stale closure no botão Continuar
   const[clienteId,setClienteId]=useState('');
   const[buscaCliente,setBuscaCliente]=useState('');
+  const[editingId,setEditingId]=useState(null);
+  const[formKey,setFormKey]=useState(0);
   const[form,setForm]=useState({obs:'',data:today(),pago:false,turno:getTurno()});
   const[itens,setItens]=useState([]);
   const[printing,setPrinting]=useState(null);
@@ -438,13 +440,22 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   const totIt=itens.reduce((s,i)=>s+i.valor*i.qtd,0);
   const cSel=clientes.find(c=>String(c.id)===clienteId);
 
-  const reset=()=>{setSheet(false);setStep(1);setClienteId('');setBuscaCliente('');setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([])};
+  const reset=()=>{setSheet(false);setStep(1);setClienteId('');setBuscaCliente('');setEditingId(null);setFormKey(k=>k+1);setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([])};
   const togItem=item=>setItens(prev=>{const ex=prev.find(i=>i.id===item.id);if(ex)return prev.map(i=>i.id===item.id?{...i,qtd:i.qtd+1}:i);return[...prev,{...item,qtd:1}]});
   const setQtd=(id,q)=>{if(q<1)setItens(p=>p.filter(i=>i.id!==id));else setItens(p=>p.map(i=>i.id===id?{...i,qtd:q}:i))};
 
   const togglePago=async id=>{
     const list=pedidos.map(p=>p.id===id?{...p,pago:!p.pago}:p);
     await DB.set('clauq:pedidos',list);setPedidos(list);
+  };
+  const startEdit=p=>{
+    setEditingId(p.id);
+    setClienteId(String(p.clienteId));
+    setBuscaCliente('');
+    setForm({obs:p.obs||'',data:p.data,pago:p.pago||false,turno:p.turno||getTurno()});
+    setItens(p.itensDetalhes&&p.itensDetalhes.length>0?p.itensDetalhes.map(i=>({...i})):[]);
+    setStep(1);
+    setSheet(true);
   };
   const toggleEntregue=async id=>{
     const list=pedidos.map(p=>p.id===id?{...p,entregue:!p.entregue}:p);
@@ -454,9 +465,16 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   const save=async()=>{
     if(!clienteId||!cSel)return toast('Selecione um cliente.','error');
     if(itens.length===0)return toast('Adicione pelo menos 1 item.','error');
-    const pedido={id:Date.now(),clienteId:Number(clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,...form,entregue:false};
-    const list=[...pedidos,pedido];
-    await DB.set('clauq:pedidos',list);setPedidos(list);toast('Pedido criado!','success');reset();
+    const base={clienteId:Number(clienteId),cliente:cSel.nome,itens:itens.map(i=>`${i.qtd}x ${i.nome}`).join(', '),itensDetalhes:itens,valor:totIt,...form};
+    let list;
+    if(editingId){
+      list=pedidos.map(p=>p.id===editingId?{...p,...base}:p);
+      toast('Pedido atualizado!','success');
+    }else{
+      list=[...pedidos,{id:Date.now(),...base,entregue:false}];
+      toast('Pedido criado!','success');
+    }
+    await DB.set('clauq:pedidos',list);setPedidos(list);reset();
   };
   const del=async id=>{
     if(!confirm('Remover pedido?'))return;
@@ -503,18 +521,20 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
     <div style=${{position:'relative',marginBottom:'10px'}}>
       <div style=${{position:'absolute',left:'13px',top:'50%',transform:'translateY(-50%)',pointerEvents:'none'}}><${Ic} n="search" s=${17} c=${T.sub}/></div>
       <input
-        value=${buscaCliente}
+        key=${`busca-${formKey}`}
+        defaultValue=""
         onInput=${e=>setBuscaCliente(e.target.value)}
         placeholder="Buscar cliente..."
         class="inp"
         style=${{paddingLeft:'40px'}}
+        autoComplete="off"
       />
     </div>
     <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'20px',maxHeight:'40vh',overflowY:'auto'}}>
       ${clientes.length===0
         ?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Cadastre clientes primeiro.</p>`
         :(()=>{
-          const fil=clientes.filter(c=>c.nome.toLowerCase().includes(buscaCliente.toLowerCase())||(c.telefone||'').includes(buscaCliente));
+          const fil=clientes.filter(c=>c.nome.toLowerCase().includes(buscaCliente.toLowerCase())||(c.telefone||'').includes(buscaCliente)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
           if(fil.length===0)return x`<p style=${{color:T.sub,textAlign:'center',padding:'16px',fontSize:'14px'}}>Nenhum cliente encontrado.</p>`;
           return fil.map(c=>x`
             <button key=${c.id} onClick=${()=>setClienteId(String(c.id))} style=${{background:clienteId===String(c.id)?T.ac+'18':T.card,border:`2px solid ${clienteId===String(c.id)?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px',cursor:'pointer',textAlign:'left',width:'100%'}}>
@@ -576,7 +596,17 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
         <div style=${{display:'flex',justifyContent:'space-between',fontFamily:"'DM Serif Display',serif",fontSize:'20px',color:T.ac,marginTop:'8px',paddingTop:'8px',borderTop:`1px solid ${T.br}`}}><span>Total</span><span>${fmt(totIt)}</span></div>
       </div>
     <//>
-    <${Inp} label="Observações (opcional)" value=${form.obs} onInput=${e=>setForm(f=>({...f,obs:e.target.value}))}/>
+    <div style=${{marginBottom:'14px'}}>
+      <label class="inp-lbl">Observações (opcional)</label>
+      <textarea
+        key=${`obs-${formKey}`}
+        defaultValue=${form.obs}
+        onInput=${e=>setForm(f=>({...f,obs:e.target.value}))}
+        class="inp"
+        style=${{minHeight:'72px',resize:'vertical'}}
+        placeholder="Ex: sem cebola, pimenta à parte..."
+      />
+    </div>
     <div style=${{marginBottom:'16px'}}>
       <label class="inp-lbl">Status de pagamento</label>
       <div style=${{display:'flex',gap:'10px'}}>
@@ -614,7 +644,7 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
             <div style=${{flex:1}}>
               <div style=${{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px',flexWrap:'wrap'}}>
                 <span style=${{background:T.ac,color:'#fff',borderRadius:'6px',padding:'2px 8px',fontSize:'11px',fontWeight:700}}>#${i+1}</span>
-                <span style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${p.cliente}</span>
+                <button onClick=${()=>startEdit(p)} style=${{background:'none',border:'none',padding:0,cursor:'pointer',fontWeight:700,fontSize:'15px',color:'#1d4ed8',textDecoration:'underline',textDecorationStyle:'dotted',textUnderlineOffset:'3px',fontFamily:"'DM Sans',sans-serif"}} title="Toque para editar">${p.cliente}</button>
                 ${p.turno?x`<span style=${{fontSize:'11px',color:T.sub}}>${p.turno}</span>`:null}
               </div>
               <div style=${{fontSize:'13px',color:T.sub}}>🍽 ${p.itens}</div>
@@ -636,9 +666,9 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
         <//>`) }
       </div>
     `}
-    <${FAB} onClick=${()=>{setStep(1);setClienteId('');setBuscaCliente('');setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([]);setSheet(true)}} label="Novo pedido"/>
-    ${sheet?x`<${Sheet} title="Novo Pedido" onClose=${reset} full=${true}>
-      ${step===1?x`<${Step1}/>`:step===2?x`<${Step2}/>`:x`<${Step3}/>`}
+    <${FAB} onClick=${()=>{setStep(1);setClienteId('');setBuscaCliente('');setEditingId(null);setFormKey(k=>k+1);setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([]);setSheet(true)}} label="Novo pedido"/>
+    ${sheet?x`<${Sheet} title=${editingId?'Editar Pedido':'Novo Pedido'} onClose=${reset} full=${true}>
+      ${step===1?Step1():step===2?Step2():Step3()}
     <//>`:null}
   </div>`;
 }
@@ -649,7 +679,22 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
 function Cardapio({cardapio,setCardapio,toast}){
   const[sheet,setSheet]=useState(null),[catF,setCatF]=useState('Todos');
   const[form,setForm]=useState({nome:'',descricao:'',valor:'',categoria:'Marmita'});
-  const cats=['Marmita','Bebida','Sobremesa','Adicional','Outro'];
+  const DEFAULT_CATS=['Marmita','Bebida','Sobremesa','Adicional','Outro'];
+  const[customCats,setCustomCats]=useState(()=>{try{return JSON.parse(localStorage.getItem('clauq:customCats')||'[]')}catch{return[]}});
+  const[addingCat,setAddingCat]=useState(false);
+  const[newCatName,setNewCatName]=useState('');
+  const cats=[...DEFAULT_CATS,...customCats];
+  const saveNewCat=()=>{
+    const name=newCatName.trim();
+    if(!name)return;
+    if(cats.includes(name))return toast('Categoria já existe.','warning');
+    const updated=[...customCats,name];
+    localStorage.setItem('clauq:customCats',JSON.stringify(updated));
+    setCustomCats(updated);
+    setForm(f=>({...f,categoria:name}));
+    setNewCatName('');setAddingCat(false);
+    toast(`Categoria "${name}" criada!`,'success');
+  };
   const save=()=>{
     if(!form.nome.trim())return toast('Informe o nome.','error');
     if(!form.valor||isNaN(Number(form.valor)))return toast('Valor inválido.','error');
@@ -664,7 +709,7 @@ function Cardapio({cardapio,setCardapio,toast}){
   const shown=catF==='Todos'?cardapio:cardapio.filter(c=>c.categoria===catF);
   return x`<div>
     <${SHead} title=${`Cardápio (${cardapio.length})`}/>
-    <div style=${{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px'}}>
+    <div style=${{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px',alignItems:'center'}}>
       ${['Todos',...cats].map(cat=>x`<button key=${cat} onClick=${()=>setCatF(cat)} style=${{background:catF===cat?T.ac:'#f0e8df',color:catF===cat?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'8px 16px',fontSize:'13px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${cat}</button>`)}
     </div>
     ${shown.length===0?x`<div style=${{textAlign:'center',padding:'40px',color:T.sub}}>Nenhum item. Adicione!</div>`:x`
@@ -692,8 +737,24 @@ function Cardapio({cardapio,setCardapio,toast}){
       <${Inp} label="Valor (R$) *" type="number" min="0" step="0.01" value=${form.valor} onInput=${e=>setForm({...form,valor:e.target.value})}/>
       <div style=${{marginBottom:'14px'}}>
         <label class="inp-lbl">Categoria</label>
-        <div style=${{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+        <div style=${{display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center'}}>
           ${cats.map(c=>x`<button key=${c} onClick=${()=>setForm({...form,categoria:c})} style=${{background:form.categoria===c?T.ac:'#f0e8df',color:form.categoria===c?'#fff':T.sub,border:'none',borderRadius:'20px',padding:'9px 18px',fontSize:'14px',fontWeight:600,cursor:'pointer'}}>${c}</button>`)}
+          ${addingCat
+            ?x`<div style=${{display:'flex',gap:'6px',alignItems:'center'}}>
+                <input
+                  key="new-cat-input"
+                  autoFocus
+                  value=${newCatName}
+                  onInput=${e=>setNewCatName(e.target.value)}
+                  onKeyDown=${e=>{if(e.key==='Enter')saveNewCat();if(e.key==='Escape'){setAddingCat(false);setNewCatName('');}}}
+                  placeholder="Nova categoria..."
+                  style=${{padding:'8px 12px',borderRadius:'20px',border:`1.5px solid ${T.ac}`,background:'#fff',fontSize:'13px',fontWeight:600,outline:'none',width:'140px',fontFamily:"'DM Sans',sans-serif"}}
+                />
+                <button onClick=${saveNewCat} style=${{background:T.ac,color:'#fff',border:'none',borderRadius:'50%',width:'30px',height:'30px',cursor:'pointer',fontSize:'18px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,flexShrink:0}}>✓</button>
+                <button onClick=${()=>{setAddingCat(false);setNewCatName('')}} style=${{background:'#f0e8df',color:T.sub,border:'none',borderRadius:'50%',width:'30px',height:'30px',cursor:'pointer',fontSize:'16px',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>✕</button>
+              </div>`
+            :x`<button onClick=${()=>setAddingCat(true)} title="Nova categoria" style=${{background:'#e8ddd0',color:T.sub,border:'2px dashed #c8b89a',borderRadius:'50%',width:'34px',height:'34px',cursor:'pointer',fontSize:'20px',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontWeight:700}}>+</button>`
+          }
         </div>
       </div>
       <div style=${{display:'flex',gap:'10px',marginTop:'8px'}}>
