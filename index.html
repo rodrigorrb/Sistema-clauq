@@ -96,6 +96,62 @@ const OPFS={
 };
 
 // ═══════════════════════════════════════════════════════════════
+// DirHandleDB — persiste FileSystemDirectoryHandle no IDB
+// ═══════════════════════════════════════════════════════════════
+const DIR_KEY='__clauq_dirhandle__';
+const DirHandleDB={
+  async get(){
+    try{const db=await getIDB();return new Promise((res,rej)=>{const r=db.transaction('kv','readonly').objectStore('kv').get(DIR_KEY);r.onsuccess=()=>res(r.result??null);r.onerror=rej})}
+    catch{return null}
+  },
+  async set(h){
+    try{const db=await getIDB();await new Promise((res,rej)=>{const r=db.transaction('kv','readwrite').objectStore('kv').put(h,DIR_KEY);r.onsuccess=res;r.onerror=rej})}
+    catch{}
+  },
+  async clear(){
+    try{const db=await getIDB();await new Promise((res,rej)=>{const r=db.transaction('kv','readwrite').objectStore('kv').delete(DIR_KEY);r.onsuccess=res;r.onerror=rej})}
+    catch{}
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// UserDir — lê/grava na pasta escolhida pelo usuário
+// ═══════════════════════════════════════════════════════════════
+const UserDir={
+  get supported(){return'showDirectoryPicker'in window},
+  async _perm(h,req=false){
+    try{
+      let p=await h.queryPermission({mode:'readwrite'});
+      if(p!=='granted'&&req)p=await h.requestPermission({mode:'readwrite'});
+      return p==='granted';
+    }catch{return false}
+  },
+  async write(h,data){
+    if(!h)return false;
+    try{
+      if(!await this._perm(h,true))return false;
+      const fh=await h.getFileHandle('clauq-backup.json',{create:true});
+      const ws=await fh.createWritable();
+      await ws.write(JSON.stringify({...data,savedAt:new Date().toISOString()}));
+      await ws.close();return true;
+    }catch{return false}
+  },
+  async read(h){
+    if(!h)return null;
+    try{
+      if(!await this._perm(h))return null;
+      const fh=await h.getFileHandle('clauq-backup.json');
+      const file=await fh.getFile();
+      return JSON.parse(await file.text());
+    }catch{return null}
+  },
+  async pick(){
+    try{return await window.showDirectoryPicker({id:'clauq',mode:'readwrite',startIn:'documents'})}
+    catch{return null}
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
 // IndexedDB — banco local rápido (camada secundária)
 // ═══════════════════════════════════════════════════════════════
 let _idb=null;
@@ -426,6 +482,7 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   const[buscaCliente,setBuscaCliente]=useState('');
   const[editingId,setEditingId]=useState(null);
   const[formKey,setFormKey]=useState(0);
+  const[catStep2,setCatStep2]=useState('Todos');
   const[form,setForm]=useState({obs:'',data:today(),pago:false,turno:getTurno()});
   const[itens,setItens]=useState([]);
   const[printing,setPrinting]=useState(null);
@@ -440,7 +497,7 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   const totIt=itens.reduce((s,i)=>s+i.valor*i.qtd,0);
   const cSel=clientes.find(c=>String(c.id)===clienteId);
 
-  const reset=()=>{setSheet(false);setStep(1);setClienteId('');setBuscaCliente('');setEditingId(null);setFormKey(k=>k+1);setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([])};
+  const reset=()=>{setSheet(false);setStep(1);setClienteId('');setBuscaCliente('');setEditingId(null);setFormKey(k=>k+1);setCatStep2('Todos');setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([])};
   const togItem=item=>setItens(prev=>{const ex=prev.find(i=>i.id===item.id);if(ex)return prev.map(i=>i.id===item.id?{...i,qtd:i.qtd+1}:i);return[...prev,{...item,qtd:1}]});
   const setQtd=(id,q)=>{if(q<1)setItens(p=>p.filter(i=>i.id!==id));else setItens(p=>p.map(i=>i.id===id?{...i,qtd:q}:i))};
 
@@ -553,15 +610,27 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
   </div>`;
 
   // ── Step 2: Itens ────────────────────────────────────────────
-  const Step2=()=>x`<div>
-    <p style=${{fontSize:'13px',color:T.sub,marginBottom:'14px'}}>Passo 2 de 3 — Itens</p>
+  const Step2=()=>{
+    const catsDisponiveis=['Todos',...[...new Set(cardapio.map(i=>i.categoria||'Outro'))].sort((a,b)=>a.localeCompare(b,'pt-BR'))];
+    const cardapioFiltrado=(catStep2==='Todos'?cardapio:cardapio.filter(i=>i.categoria===catStep2))
+      .slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    return x`<div>
+    <p style=${{fontSize:'13px',color:T.sub,marginBottom:'12px'}}>Passo 2 de 3 — Itens</p>
     ${cardapio.length===0?x`<p style=${{color:T.sub,textAlign:'center',padding:'20px'}}>Configure o cardápio primeiro.</p>`:x`
-      <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
-        ${cardapio.map(item=>{const sel=itens.find(i=>i.id===item.id);return x`
+      <div style=${{display:'flex',gap:'6px',overflowX:'auto',marginBottom:'12px',paddingBottom:'4px'}}>
+        ${catsDisponiveis.map(cat=>x`<button key=${cat} onClick=${()=>setCatStep2(cat)} style=${{background:catStep2===cat?T.ac:'#f0e8df',color:catStep2===cat?'#fff':T.sub,border:'none',borderRadius:'16px',padding:'6px 14px',fontSize:'12px',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>${cat}</button>`)}
+      </div>
+      <div style=${{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px',maxHeight:'42vh',overflowY:'auto'}}>
+        ${cardapioFiltrado.length===0
+          ?x`<p style=${{color:T.sub,textAlign:'center',padding:'16px',fontSize:'13px'}}>Nenhum item nesta categoria.</p>`
+          :cardapioFiltrado.map(item=>{const sel=itens.find(i=>i.id===item.id);return x`
           <div key=${item.id} style=${{background:sel?T.ac+'10':T.card,border:`2px solid ${sel?T.ac:T.br}`,borderRadius:'14px',padding:'13px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
             <button onClick=${()=>togItem(item)} style=${{flex:1,background:'none',border:'none',cursor:'pointer',textAlign:'left',padding:0}}>
               <div style=${{fontWeight:700,fontSize:'15px',color:T.tx}}>${item.nome}</div>
-              <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'15px',color:T.ac}}>${fmt(item.valor)}</div>
+              <div style=${{display:'flex',alignItems:'center',gap:'8px',marginTop:'2px'}}>
+                <div style=${{fontFamily:"'DM Serif Display',serif",fontSize:'14px',color:T.ac}}>${fmt(item.valor)}</div>
+                <span style=${{fontSize:'10px',color:T.sub,background:'#f0e8df',borderRadius:'6px',padding:'1px 6px'}}>${item.categoria||'Outro'}</span>
+              </div>
             </button>
             ${sel?x`<div style=${{display:'flex',alignItems:'center',gap:'8px',flexShrink:0}}>
               <button onClick=${()=>setQtd(sel.id,sel.qtd-1)} style=${{width:'32px',height:'32px',borderRadius:'8px',background:'#f0e8df',border:'none',cursor:'pointer',fontSize:'18px',fontWeight:700}}>−</button>
@@ -581,6 +650,7 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
       <button class="btn btn-primary btn-lg btn-full" onClick=${()=>{if(itens.length===0)return toast('Adicione itens.','error');setStep(3)}}>Continuar →</button>
     </div>
   </div>`;
+  };
 
   // ── Step 3: Confirmar ────────────────────────────────────────
   const Step3=()=>x`<div>
@@ -666,7 +736,7 @@ function Pedidos({clientes,pedidos,setPedidos,cardapio,toast,printer}){
         <//>`) }
       </div>
     `}
-    <${FAB} onClick=${()=>{setStep(1);setClienteId('');setBuscaCliente('');setEditingId(null);setFormKey(k=>k+1);setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([]);setSheet(true)}} label="Novo pedido"/>
+    <${FAB} onClick=${()=>{setStep(1);setClienteId('');setBuscaCliente('');setEditingId(null);setFormKey(k=>k+1);setCatStep2('Todos');setForm({obs:'',data:today(),pago:false,turno:getTurno()});setItens([]);setSheet(true)}} label="Novo pedido"/>
     ${sheet?x`<${Sheet} title=${editingId?'Editar Pedido':'Novo Pedido'} onClose=${reset} full=${true}>
       ${step===1?Step1():step===2?Step2():Step3()}
     <//>`:null}
@@ -706,7 +776,7 @@ function Cardapio({cardapio,setCardapio,toast}){
     if(!confirm('Remover item?'))return;
     const list=cardapio.filter(c=>c.id!==id);DB.set('clauq:cardapio',list);setCardapio(list);toast('Removido.','success');
   };
-  const shown=catF==='Todos'?cardapio:cardapio.filter(c=>c.categoria===catF);
+  const shown=(catF==='Todos'?cardapio:cardapio.filter(c=>c.categoria===catF)).slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   return x`<div>
     <${SHead} title=${`Cardápio (${cardapio.length})`}/>
     <div style=${{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'16px',paddingBottom:'4px',alignItems:'center'}}>
@@ -916,7 +986,7 @@ function Relatorio({pedidos,setPedidos,printer,toast}){
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURAÇÕES — Impressora + Backup automático
 // ═══════════════════════════════════════════════════════════════
-function Configuracoes({printer,toast,clientes,pedidos,cardapio,setCli,setPed,setCa,backupInfo,setBackupInterval}){
+function Configuracoes({printer,toast,clientes,pedidos,cardapio,setCli,setPed,setCa,backupInfo,setBackupInterval,dirHandle,setDirHandle,dirName,setDirName}){
   const{status,name,mode,changeMode,connect,disconnect}=printer;
   const[loading,setLoading]=useState(false),[err,setErr]=useState(null),[sppWarn,setSppWarn]=useState(false);
   const fileRef=useRef(null);
@@ -937,8 +1007,29 @@ function Configuracoes({printer,toast,clientes,pedidos,cardapio,setCli,setPed,se
     e.target.value='';
   };
   const doForceBackup=async()=>{
-    const ok=await OPFS.write({clientes,pedidos,cardapio});
-    toast(ok?'Backup salvo no dispositivo!':'Erro no backup (OPFS não suportado).',ok?'success':'error');
+    const data={clientes,pedidos,cardapio};
+    const opfsOk=await OPFS.write(data);
+    const dirOk=dirHandle?await UserDir.write(dirHandle,data):null;
+    const msgs=[];
+    if(opfsOk)msgs.push('OPFS ✓');
+    if(dirOk===true)msgs.push(`${dirName} ✓`);
+    if(dirOk===false)msgs.push('Pasta: sem permissão');
+    toast(msgs.length?`Backup salvo! ${msgs.join(' | ')}`:'Erro: nenhum destino disponível.',msgs.length?'success':'error');
+  };
+  const pickFolder=async()=>{
+    if(!UserDir.supported)return toast('File System Access não suportado neste navegador.','error');
+    const handle=await UserDir.pick();
+    if(!handle)return;
+    await DirHandleDB.set(handle);
+    setDirHandle(handle);setDirName(handle.name);
+    toast(`Pasta configurada: ${handle.name}`,'success');
+    // Gravar backup imediato na nova pasta
+    await UserDir.write(handle,{clientes,pedidos,cardapio});
+  };
+  const clearFolder=async()=>{
+    await DirHandleDB.clear();
+    setDirHandle(null);setDirName(null);
+    toast('Pasta de backup removida.','info');
   };
 
   return x`<div style=${{paddingBottom:'20px'}}>
@@ -967,7 +1058,30 @@ function Configuracoes({printer,toast,clientes,pedidos,cardapio,setCli,setPed,se
 
     <div class="sep"/>
     <h3 style=${{fontFamily:"'DM Serif Display',serif",fontSize:'17px',color:T.tx,marginBottom:'4px'}}>💾 Backup Automático</h3>
-    <p style=${{fontSize:'12px',color:T.sub,marginBottom:'14px'}}>Os dados são salvos automaticamente no dispositivo (OPFS), independente do cache do navegador.</p>
+    <p style=${{fontSize:'12px',color:T.sub,marginBottom:'14px'}}>Os dados são salvos no dispositivo (OPFS) e opcionalmente em uma pasta de sua escolha.</p>
+
+    <${Card} style=${{marginBottom:'14px'}}>
+      <div style=${{fontWeight:700,fontSize:'14px',color:T.tx,marginBottom:'10px',display:'flex',alignItems:'center',gap:'8px'}}><${Ic} n="download" s=${17} c=${T.g}/>Pasta de backup</div>
+      ${dirName?x`
+        <div style=${{background:'#f0fdf4',border:'1px solid #86efac',borderRadius:'10px',padding:'10px 14px',marginBottom:'12px',display:'flex',alignItems:'center',gap:'10px'}}>
+          <span style=${{fontSize:'20px'}}>📁</span>
+          <div style=${{flex:1}}>
+            <div style=${{fontWeight:700,fontSize:'14px',color:'#166534'}}>${dirName}</div>
+            <div style=${{fontSize:'11px',color:'#4ade80'}}>clauq-backup.json salvo aqui automaticamente</div>
+          </div>
+          <button onClick=${clearFolder} style=${{background:'#ffe8e8',border:'none',borderRadius:'8px',padding:'6px 10px',cursor:'pointer',fontSize:'12px',fontWeight:700,color:'#c1440e',flexShrink:0}}>✕ Remover</button>
+        </div>
+      `:x`
+        <div style=${{background:'#f5f5f5',border:'1px dashed #ccc',borderRadius:'10px',padding:'12px 14px',marginBottom:'12px',textAlign:'center'}}>
+          <div style=${{fontSize:'13px',color:T.sub,marginBottom:'6px'}}>Nenhuma pasta configurada</div>
+          <div style=${{fontSize:'11px',color:'#aaa'}}>O backup automático usa apenas o armazenamento interno (OPFS)</div>
+        </div>
+      `}
+      ${UserDir.supported?x`
+        <${Btn} full=${true} variant="green" icon="download" onClick=${pickFolder}>${dirName?'Trocar pasta':'Escolher pasta de backup'}<//>
+      `:x`<div class="info-box">File System Access não disponível neste navegador. Use Chrome/Edge.</div>`}
+      ${dirName?x`<p style=${{fontSize:'11px',color:T.sub,marginTop:'8px',textAlign:'center'}}>O arquivo será gravado automaticamente a cada ${backupInfo.interval===0?'backup manual':backupInfo.interval+' min'}.</p>`:null}
+    <//>
 
     <${Card} style=${{marginBottom:'16px'}}>
       <div style=${{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
@@ -1016,6 +1130,8 @@ function App(){
   const[toast,setToast]=useState(null);
   const[loading,setLoading]=useState(true);
   const[backupInfo,setBackupInfo]=useState({lastSave:null,interval:5,saving:false,nextIn:null});
+  const[dirHandle,setDirHandle]=useState(null);
+  const[dirName,setDirName]=useState(null);
   const timerRef=useRef(null);
   const printer=usePrinter();
   const showToast=(msg,type='success')=>setToast({msg,type,id:Date.now()});
@@ -1035,6 +1151,18 @@ function App(){
       }
       const savedInterval=parseInt(localStorage.getItem('clauq:backupInterval')||'5');
       setBackupInfo(b=>({...b,interval:savedInterval}));
+
+      // Tentar carregar handle de pasta configurada pelo usuário
+      const savedHandle=await DirHandleDB.get();
+      if(savedHandle){
+        setDirHandle(savedHandle);setDirName(savedHandle.name);
+        // Se tiver permissão, tentar ler backup da pasta do usuário
+        const userDirData=await UserDir.read(savedHandle);
+        if(userDirData?.clientes&&(!data?.savedAt||new Date(userDirData.savedAt)>new Date(data?.savedAt||0))){
+          setClientes(userDirData.clientes||[]);setPedidos(userDirData.pedidos||[]);setCardapio(userDirData.cardapio||[]);
+          setBackupInfo(b=>({...b,lastSave:fmtTime(userDirData.savedAt)}));
+        }
+      }
       setLoading(false);
     })();
   },[]);
@@ -1056,10 +1184,12 @@ function App(){
       // Salva em IndexedDB (sempre)
       await Promise.all([DB.set('clauq:clientes',clientes),DB.set('clauq:pedidos',pedidos),DB.set('clauq:cardapio',cardapio)]);
       // Salva em OPFS
-      const ok=await OPFS.write(data);
+      const opfsOk=await OPFS.write(data);
+      // Salva na pasta configurada pelo usuário (se houver)
+      if(dirHandle)await UserDir.write(dirHandle,data);
       const now=fmtTime(new Date().toISOString());
       nextTs=Date.now()+mins*60000;
-      setBackupInfo(b=>({...b,saving:false,lastSave:ok?now:b.lastSave}));
+      setBackupInfo(b=>({...b,saving:false,lastSave:opfsOk?now:b.lastSave}));
     };
     timerRef.current=setInterval(tick,mins*60000);
     // Atualiza contador de próximo backup
@@ -1108,7 +1238,7 @@ function App(){
       ${screen==='pedidos'?x`<${Pedidos} clientes=${clientes} pedidos=${pedidos} setPedidos=${setPedidos} cardapio=${cardapio} toast=${showToast} printer=${printer}/>`:null}
       ${screen==='cardapio'?x`<${Cardapio} cardapio=${cardapio} setCardapio=${setCardapio} toast=${showToast}/>`:null}
       ${screen==='relatorio'?x`<${Relatorio} pedidos=${pedidos} setPedidos=${setPedidos} printer=${printer} toast=${showToast}/>`:null}
-      ${screen==='config'?x`<${Configuracoes} printer=${printer} toast=${showToast} clientes=${clientes} pedidos=${pedidos} cardapio=${cardapio} setCli=${setClientes} setPed=${setPedidos} setCa=${setCardapio} backupInfo=${backupInfo} setBackupInterval=${setBackupInterval}/>`:null}
+      ${screen==='config'?x`<${Configuracoes} printer=${printer} toast=${showToast} clientes=${clientes} pedidos=${pedidos} cardapio=${cardapio} setCli=${setClientes} setPed=${setPedidos} setCa=${setCardapio} backupInfo=${backupInfo} setBackupInterval=${setBackupInterval} dirHandle=${dirHandle} setDirHandle=${setDirHandle} dirName=${dirName} setDirName=${setDirName}/>`:null}
     </main>
     <nav class="nav">
       ${NAV.map(n=>{const active=screen===n.id;return x`
